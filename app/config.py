@@ -1,13 +1,13 @@
-"""Zentrale Konfiguration — alles ueber Umgebungsvariablen steuerbar."""
+"""Zentrale Konfiguration — alles über Umgebungsvariablen steuerbar."""
 import os
 from pathlib import Path
 
 DATA_DIR = Path(os.environ.get("KOMPASS_DATA_DIR", "/data"))
 DB_PATH = DATA_DIR / "kompass.db"
 
-# Standardmaessig redet Kompass mit dem Ollama, das schon fuer PULS laeuft.
-# Die beiden Container muessen dafuer im selben Docker-Netz haengen —
-# darum kuemmert sich deploy.sh.
+# Standardmäßig redet Kompass mit dem Ollama, das schon fuer PULS läuft.
+# Die beiden Container müssen dafuer im selben Docker-Netz hängen —
+# darum kümmert sich deploy.sh.
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://puls-ollama:11434")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen3:8b")
 OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "600"))

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Kompass">
+  <rect width="512" height="512" rx="96" fill="#0e1013"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#262b31" stroke-width="14"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#5d94a8" stroke-width="14"
+          stroke-dasharray="60 883" stroke-linecap="round" transform="rotate(-90 256 256)"/>
+  <!-- Die Nadel: nach Nordost, weil geradeaus selten die Richtung ist -->
+  <path d="M256 126 L296 296 L256 262 L216 296 Z" fill="#5d94a8"/>
+  <path d="M256 386 L216 216 L256 250 L296 216 Z" fill="#3a4046"/>
+  <circle cx="256" cy="256" r="16" fill="#0e1013" stroke="#5d94a8" stroke-width="8"/>
+</svg>

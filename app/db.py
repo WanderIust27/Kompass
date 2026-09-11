@@ -1,6 +1,6 @@
 """SQLite-Zugriff — bewusst schlank, ohne ORM.
 
-Eine Datei, eine Sperre, klare Tabellen. Alles, was Kompass ueber dich weiss,
+Eine Datei, eine Sperre, klare Tabellen. Alles, was Kompass über dich weiß,
 steht hier und nirgends sonst.
 """
 from __future__ import annotations
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS inbox (
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     status TEXT NOT NULL DEFAULT 'new',      -- new | sorted | dismissed
     kind TEXT,                               -- task|idea|note|purchase|person|rec|routine
-    suggestion_json TEXT,                    -- was das Modell daraus lesen wuerde
+    suggestion_json TEXT,                    -- was das Modell daraus lesen würde
     target_kind TEXT,
     target_id INTEGER,
     sorted_at TEXT
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS projects (
 );
 
 -- Der Parkplatz. Jede Idee liegt erst eine Karenzzeit hier, bevor sie
--- ueberhaupt zur Abstimmung steht.
+-- überhaupt zur Abstimmung steht.
 CREATE TABLE IF NOT EXISTS ideas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS ideas (
     ripe_at TEXT NOT NULL,                   -- Ende der Karenz
     status TEXT NOT NULL DEFAULT 'parked',   -- parked | ripe | promoted | dropped | later
     review_json TEXT,                        -- deine Antworten im Bewertungsritual
-    ai_take TEXT,                            -- Einschaetzung des Modells
+    ai_take TEXT,                            -- Einschätzung des Modells
     decided_at TEXT,
     project_id INTEGER,
     revived INTEGER NOT NULL DEFAULT 0       -- wie oft schon wiederbelebt
@@ -83,8 +83,8 @@ CREATE TABLE IF NOT EXISTS tasks (
     sort_order INTEGER NOT NULL DEFAULT 100
 );
 
--- Haushalt. Der Rhythmus zaehlt ab der letzten Erledigung, nicht ab Kalender —
--- sonst haengt nach einer vollen Woche alles gleichzeitig ueber dir.
+-- Haushalt. Der Rhythmus zählt ab der letzten Erledigung, nicht ab Kalender —
+-- sonst hängt nach einer vollen Woche alles gleichzeitig über dir.
 CREATE TABLE IF NOT EXISTS routines (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS routines (
     note TEXT,
     sort_order INTEGER NOT NULL DEFAULT 100,
     streak INTEGER NOT NULL DEFAULT 0,
-    skips INTEGER NOT NULL DEFAULT 0,        -- wie oft zuletzt weggedrueckt
+    skips INTEGER NOT NULL DEFAULT 0,        -- wie oft zuletzt weggedrückt
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS routine_log (
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS routine_log (
     note TEXT
 );
 
--- Kaufberatung: Wartefrist, Verhoer, Recherche, Budget, spaetere Ehrlichkeit.
+-- Kaufberatung: Wartefrist, Verhör, Recherche, Budget, spätere Ehrlichkeit.
 CREATE TABLE IF NOT EXISTS purchases (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -121,8 +121,8 @@ CREATE TABLE IF NOT EXISTS purchases (
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     wait_until TEXT,
     wait_hours INTEGER,
-    answers_json TEXT,                       -- Antworten aus dem Verhoer
-    research_json TEXT,                      -- Fundstuecke aus dem Netz
+    answers_json TEXT,                       -- Antworten aus dem Verhör
+    research_json TEXT,                      -- Fundstücke aus dem Netz
     ai_take TEXT,
     decided_at TEXT,
     bought_at TEXT,
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS notes (
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(title, body);
--- Vektoren fuer die semantische Suche: float32, auf Laenge 1 normiert,
+-- Vektoren fuer die semantische Suche: float32, auf Länge 1 normiert,
 -- damit das Skalarprodukt direkt die Aehnlichkeit ist.
 CREATE TABLE IF NOT EXISTS note_vectors (
     note_id INTEGER PRIMARY KEY REFERENCES notes(id) ON DELETE CASCADE,
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS people (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     birthday TEXT,                           -- YYYY-MM-DD oder --MM-DD
-    cadence_days INTEGER,                    -- gewuenschter Melde-Rhythmus
+    cadence_days INTEGER,                    -- gewünschter Melde-Rhythmus
     last_contact TEXT,
     note TEXT,
     tags TEXT,
@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS checkins (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Was Kompass ueber dich gelernt hat. Teils gerechnet, teils vom Modell.
+-- Was Kompass über dich gelernt hat. Teils gerechnet, teils vom Modell.
 CREATE TABLE IF NOT EXISTS profile_facts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     key TEXT NOT NULL UNIQUE,
@@ -246,11 +246,11 @@ CREATE INDEX IF NOT EXISTS idx_events_at ON events(at DESC);
 DEFAULT_SETTINGS: dict[str, str] = {
     # --- Ideen- und Projektbremse -------------------------------------
     "idea_cooldown_days": "7",       # so lange liegt jede Idee auf dem Parkplatz
-    "wip_limit": "3",                # so viele Projekte duerfen gleichzeitig laufen
+    "wip_limit": "3",                # so viele Projekte dürfen gleichzeitig laufen
     # --- Kaufberatung --------------------------------------------------
     "buy_threshold_small": "20",     # ab hier wird gewartet
     "buy_wait_small_h": "48",
-    "buy_threshold_big": "100",      # ab hier laenger
+    "buy_threshold_big": "100",      # ab hier länger
     "buy_wait_big_h": "168",
     "buy_budget_month": "",          # leer = kein Budget gesetzt
     "buy_usage_check_days": "30",    # so lange nach dem Kauf fragt er nach
@@ -273,29 +273,29 @@ DEFAULT_SETTINGS: dict[str, str] = {
 
 # Startplan Haushalt. Bewusst kleinteilig: "Bad putzen" ist eine Stunde und
 # wird verschoben, "Waschbecken und Spiegel" sind fuenf Minuten und werden
-# gemacht. Alles hier ist in der App aenderbar und loeschbar.
+# gemacht. Alles hier ist in der App änderbar und löschbar.
 SEED_ROUTINES: list[tuple[str, str, float, int, str]] = [
     # (Titel, Raum, Intervall in Tagen, Dauer, Energie)
-    ("Abwasch / Spuelmaschine ausraeumen", "Kueche", 1, 10, "niedrig"),
-    ("Arbeitsflaechen abwischen", "Kueche", 1, 5, "niedrig"),
-    ("Kuehlschrank durchsehen", "Kueche", 14, 15, "niedrig"),
-    ("Herd und Dunstabzug", "Kueche", 14, 20, "mittel"),
-    ("Muell rausbringen", "Kueche", 4, 5, "niedrig"),
-    ("Altpapier und Glas wegbringen", "Kueche", 21, 15, "mittel"),
+    ("Abwasch / Spülmaschine ausräumen", "Küche", 1, 10, "niedrig"),
+    ("Arbeitsflächen abwischen", "Küche", 1, 5, "niedrig"),
+    ("Kühlschrank durchsehen", "Küche", 14, 15, "niedrig"),
+    ("Herd und Dunstabzug", "Küche", 14, 20, "mittel"),
+    ("Müll rausbringen", "Küche", 4, 5, "niedrig"),
+    ("Altpapier und Glas wegbringen", "Küche", 21, 15, "mittel"),
     ("Waschbecken und Spiegel", "Bad", 3, 5, "niedrig"),
     ("WC putzen", "Bad", 7, 10, "mittel"),
     ("Dusche putzen", "Bad", 7, 15, "mittel"),
-    ("Handtuecher wechseln", "Bad", 7, 5, "niedrig"),
+    ("Handtücher wechseln", "Bad", 7, 5, "niedrig"),
     ("Staubsaugen", "Wohnung", 4, 15, "mittel"),
     ("Boden wischen", "Wohnung", 14, 20, "mittel"),
     ("Staub wischen", "Wohnung", 14, 15, "niedrig"),
-    ("Schreibtisch leerraeumen", "Wohnung", 7, 10, "niedrig"),
-    ("Pflanzen giessen", "Wohnung", 4, 5, "niedrig"),
+    ("Schreibtisch leerräumen", "Wohnung", 7, 10, "niedrig"),
+    ("Pflanzen gießen", "Wohnung", 4, 5, "niedrig"),
     ("Fenster putzen", "Wohnung", 90, 45, "hoch"),
-    ("Waesche waschen und aufhaengen", "Waesche", 4, 15, "niedrig"),
-    ("Bettwaesche wechseln", "Waesche", 14, 15, "mittel"),
-    ("Waesche zusammenlegen und wegraeumen", "Waesche", 7, 20, "niedrig"),
-    ("Einkauf und Vorraete", "Versorgung", 7, 45, "mittel"),
+    ("Wäsche waschen und aufhängen", "Wäsche", 4, 15, "niedrig"),
+    ("Bettwäsche wechseln", "Wäsche", 14, 15, "mittel"),
+    ("Wäsche zusammenlegen und wegräumen", "Wäsche", 7, 20, "niedrig"),
+    ("Einkauf und Vorräte", "Versorgung", 7, 45, "mittel"),
 ]
 
 
@@ -312,20 +312,24 @@ def init_db() -> None:
 def _seed_routines(db: sqlite3.Connection) -> None:
     """Startplan nur einmal anlegen.
 
-    Ueber den Merker in settings, nicht ueber "Tabelle ist leer" — sonst
-    kaemen geloeschte Routinen beim naechsten Start alle wieder.
+    Ueber den Merker in settings, nicht über "Tabelle ist leer" — sonst
+    kämen gelöschte Routinen beim nächsten Start alle wieder.
     """
     row = db.execute("SELECT value FROM settings WHERE key='routines_seeded'"
                      ).fetchone()
     if row and row["value"] == "1":
         return
-    today = date.today().isoformat()
+    # Nicht alles auf den ersten Tag legen: Zwanzig fällige Punkte am Tag eins
+    # sind keine Liste, sondern eine Wand. Jede Routine startet um ein paar Tage
+    # versetzt — innerhalb ihres eigenen Rhythmus, damit sich das einpendelt.
     for i, (title, room, interval, minutes, energy) in enumerate(SEED_ROUTINES):
+        offset = i % max(1, min(int(interval), 7))
         db.execute(
             """INSERT INTO routines(title, room, interval_days, duration_min,
                                     energy, next_due, sort_order)
                VALUES(?,?,?,?,?,?,?)""",
-            (title, room, interval, minutes, energy, today, i * 10))
+            (title, room, interval, minutes, energy,
+             (date.today() + timedelta(days=offset)).isoformat(), i * 10))
     db.execute("INSERT OR REPLACE INTO settings(key, value) VALUES('routines_seeded','1')")
 
 
@@ -334,7 +338,7 @@ def get_db() -> Iterator[sqlite3.Connection]:
     """Datenbankverbindung mit Sperre.
 
     Achtung: Die Sperre ist nicht reentrant. Innerhalb eines offenen get_db()
-    darf nichts aufgerufen werden, das seinerseits die Datenbank oeffnet —
+    darf nichts aufgerufen werden, das seinerseits die Datenbank öffnet —
     auch nicht get_setting(). Werte, die in einer Schleife gebraucht werden,
     vorher bestimmen.
     """
@@ -388,7 +392,7 @@ def all_settings() -> dict[str, str]:
 
 
 def log_event(kind: str, text: str) -> None:
-    """Was Kompass selbst getan hat — fuer die Zeile 'was ich veraendert habe'."""
+    """Was Kompass selbst getan hat — fuer die Zeile 'was ich verändert habe'."""
     with get_db() as db:
         db.execute("INSERT INTO events(kind, text) VALUES(?,?)", (kind, text))
 

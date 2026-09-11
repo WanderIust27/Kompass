@@ -2,10 +2,10 @@
 
 Zwei Entscheidungen stecken hier drin, beide bewusst:
 
-1. Der Rhythmus zaehlt ab der letzten Erledigung, nicht ab einem festen
+1. Der Rhythmus zählt ab der letzten Erledigung, nicht ab einem festen
    Kalendertag. Wer eine Woche nicht da war, kommt sonst zu einem Berg
-   heim, der sich taeglich weiter auftuermt.
-2. Wer eine Routine dreimal hintereinander wegdrueckt, meint nicht sich
+   heim, der sich täglich weiter auftürmt.
+2. Wer eine Routine dreimal hintereinander wegdrückt, meint nicht sich
    selbst, sondern den Rhythmus. Kompass streckt ihn dann von allein und
    sagt es — statt weiter jeden Tag dasselbe zu fordern.
 """
@@ -97,7 +97,7 @@ def query(active_only: bool = True, room: str | None = None) -> list[dict[str, A
 
 
 def due(day: str | None = None) -> list[dict[str, Any]]:
-    """Was heute (oder frueher) faellig ist — das Herz des Haushaltsteils."""
+    """Was heute (oder frueher) fällig ist — das Herz des Haushaltsteils."""
     day = day or today_str()
     with get_db() as db:
         rows = db.execute(
@@ -107,7 +107,7 @@ def due(day: str | None = None) -> list[dict[str, Any]]:
 
 
 def complete(routine_id: int, note: str | None = None) -> dict[str, Any]:
-    """Erledigt: Rhythmus laeuft ab jetzt neu."""
+    """Erledigt: Rhythmus läuft ab jetzt neu."""
     routine = get(routine_id)
     interval = float(routine["interval_days"] or 7)
     next_due = (date.today() + timedelta(days=interval)).isoformat()
@@ -121,7 +121,7 @@ def complete(routine_id: int, note: str | None = None) -> dict[str, Any]:
 
 
 def snooze(routine_id: int, days: int = 1) -> dict[str, Any]:
-    """Weggedrueckt. Beim dritten Mal streckt Kompass den Rhythmus selbst."""
+    """Weggedrückt. Beim dritten Mal streckt Kompass den Rhythmus selbst."""
     routine = get(routine_id)
     base = parse_day(routine.get("next_due")) or date.today()
     new_due = max(base, date.today()) + timedelta(days=days)
@@ -146,10 +146,10 @@ def snooze(routine_id: int, days: int = 1) -> dict[str, Any]:
 
 
 def split_hint(routine: dict[str, Any]) -> str | None:
-    """Grosse Brocken lassen sich schlecht anfangen. Kleiner schneiden hilft."""
+    """Große Brocken lassen sich schlecht anfangen. Kleiner schneiden hilft."""
     if int(routine.get("duration_min") or 0) >= 20 and int(routine.get("skips") or 0) >= 2:
         return (f"„{routine['title']}“ dauert {routine['duration_min']} Minuten und "
-                f"bleibt liegen. Mach nur den ersten Teil — das zaehlt auch.")
+                f"bleibt liegen. Mach nur den ersten Teil — das zählt auch.")
     return None
 
 
@@ -159,7 +159,7 @@ def stats() -> dict[str, Any]:
             """SELECT
                  (SELECT COUNT(*) FROM routines WHERE active=1) AS gesamt,
                  (SELECT COUNT(*) FROM routines WHERE active=1
-                    AND next_due<=date('now','localtime')) AS faellig,
+                    AND next_due<=date('now','localtime')) AS fällig,
                  (SELECT COUNT(*) FROM routines WHERE active=1
                     AND next_due<date('now','localtime','-3 day')) AS lange_ueberfaellig,
                  (SELECT COUNT(*) FROM routine_log

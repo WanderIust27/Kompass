@@ -1,8 +1,8 @@
-"""Duenner Client fuer die lokale Ollama-Instanz.
+"""Dünner Client fuer die lokale Ollama-Instanz.
 
-Kompass teilt sich das Ollama mit PULS. Das heisst auch: das Modell kann
+Kompass teilt sich das Ollama mit PULS. Das heißt auch: das Modell kann
 gerade fuer die andere App im Speicher liegen und ein paar Sekunden brauchen,
-bis es antwortet. Deshalb sind die Zeitlimits grosszuegig.
+bis es antwortet. Deshalb sind die Zeitlimits großzügig.
 """
 from __future__ import annotations
 
@@ -18,26 +18,26 @@ from ..db import get_setting
 
 log = logging.getLogger("kompass.ollama")
 
-# Auswahl fuer die Oberflaeche. Groessen sind Richtwerte fuer Q4; die
-# Einschaetzung zur Geschwindigkeit gilt fuer eine 8-GB-Karte.
+# Auswahl fuer die Oberfläche. Größen sind Richtwerte fuer Q4; die
+# Einschätzung zur Geschwindigkeit gilt fuer eine 8-GB-Karte.
 MODEL_PRESETS = [
     {"name": "qwen3:8b", "label": "Qwen 3 · 8B", "size_gb": 4.7,
-     "speed": "fluessig",
+     "speed": "flüssig",
      "note": "Empfohlen und dasselbe Modell, das PULS benutzt — dann liegt nur "
-             "eines auf der Karte. Bestes Deutsch in dieser Groesse, argumentiert "
+             "eines auf der Karte. Bestes Deutsch in dieser Größe, argumentiert "
              "ordentlich genug fuer Kaufberatung und Ideenbewertung."},
     {"name": "qwen3:4b", "label": "Qwen 3 · 4B", "size_gb": 2.8,
      "speed": "schnell",
-     "note": "Etwa doppelt so schnell. Merklich schlichter, wenn er abwaegen "
-             "soll — fuer Einsortieren und kurze Rueckmeldungen aber genug."},
+     "note": "Etwa doppelt so schnell. Merklich schlichter, wenn er abwägen "
+             "soll — fuer Einsortieren und kurze Rückmeldungen aber genug."},
     {"name": "gemma3:4b", "label": "Gemma 3 · 4B", "size_gb": 2.6,
      "speed": "schnell",
-     "note": "Formuliert oft natuerlicher als Qwen, denkt dafuer weniger "
+     "note": "Formuliert oft natürlicher als Qwen, denkt dafuer weniger "
              "strukturiert. Angenehm fuer Briefings."},
     {"name": "llama3.2:3b", "label": "Llama 3.2 · 3B", "size_gb": 2.0,
      "speed": "sehr schnell",
-     "note": "Der Sparsame. Laesst noch Platz fuer ein zweites Modell auf der "
-             "Karte, bei laengeren Begruendungen merkt man die Groesse."},
+     "note": "Der Sparsame. Lässt noch Platz fuer ein zweites Modell auf der "
+             "Karte, bei längeren Begründungen merkt man die Größe."},
 ]
 
 
@@ -46,7 +46,7 @@ class OllamaUnavailable(Exception):
 
 
 def active_model() -> str:
-    """In der Oberflaeche gewaehltes Modell, sonst der Wert aus der Umgebung."""
+    """In der Oberfläche gewähltes Modell, sonst der Wert aus der Umgebung."""
     return get_setting("ollama_model", "") or OLLAMA_MODEL
 
 
@@ -85,7 +85,7 @@ def pull_state() -> dict[str, Any]:
 
 
 def pull_model(name: str | None = None) -> None:
-    """Modell herunterladen. Blockiert — gehoert in einen Hintergrund-Thread."""
+    """Modell herunterladen. Blockiert — gehört in einen Hintergrund-Thread."""
     name = name or active_model()
     _pull_state.update({"model": name, "status": "laden", "percent": 0, "error": None})
     log.info("Lade Modell %s.", name)
@@ -143,7 +143,7 @@ def generate(prompt: str, system: str | None = None, json_mode: bool = False,
 
 def chat(messages: list[dict[str, str]], system: str | None = None,
          temperature: float = 0.6, num_ctx: int = 8192) -> str:
-    """Mehrzuegiges Gespraech — fuer den Chat-Reiter."""
+    """Mehrzügiges Gespräch — fuer den Chat-Reiter."""
     msgs = ([{"role": "system", "content": system}] if system else []) + messages
     payload = {"model": active_model(), "messages": msgs, "stream": False,
                "options": {"temperature": temperature, "num_ctx": num_ctx}}
@@ -169,11 +169,11 @@ def generate_json(prompt: str, system: str | None = None,
                 return json.loads(text[start:end + 1])
             except json.JSONDecodeError:
                 pass
-        raise OllamaUnavailable(f"Modell lieferte kein gueltiges JSON: {text[:200]}")
+        raise OllamaUnavailable(f"Modell lieferte kein gültiges JSON: {text[:200]}")
 
 
 def _strip_thinking(text: str) -> str:
-    """Qwen3 denkt in <think>-Bloecken. Die will hier niemand lesen."""
+    """Qwen3 denkt in <think>-Blöcken. Die will hier niemand lesen."""
     while "<think>" in text and "</think>" in text:
         start = text.find("<think>")
         end = text.find("</think>") + len("</think>")
@@ -190,8 +190,8 @@ def embed_model() -> str:
 def embed(texts: Sequence[str]) -> list[list[float]]:
     """Texte in Vektoren verwandeln — fuer die semantische Notizsuche.
 
-    Neuere Ollama-Versionen koennen /api/embed mit mehreren Texten auf einmal,
-    aeltere nur /api/embeddings mit einem. Beides wird bedient.
+    Neuere Ollama-Versionen können /api/embed mit mehreren Texten auf einmal,
+    ältere nur /api/embeddings mit einem. Beides wird bedient.
     """
     if not EMBED_MODEL:
         raise OllamaUnavailable("Kein Einbettungsmodell gesetzt.")
@@ -222,7 +222,7 @@ def embed(texts: Sequence[str]) -> list[list[float]]:
 
 
 def _normalise(vec: Sequence[float]) -> list[float]:
-    """Auf Laenge 1 bringen — dann ist das Skalarprodukt die Aehnlichkeit."""
+    """Auf Länge 1 bringen — dann ist das Skalarprodukt die Aehnlichkeit."""
     total = sum(v * v for v in vec) ** 0.5
     if not total:
         return list(vec)

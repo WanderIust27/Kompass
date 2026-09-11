@@ -85,7 +85,7 @@ def delete(task_id: int) -> None:
 
 
 def snooze(task_id: int, days: int = 1) -> dict[str, Any]:
-    """Aufgabe verschieben. Wird mitgezaehlt — daraus lernt Kompass spaeter."""
+    """Aufgabe verschieben. Wird mitgezählt — daraus lernt Kompass später."""
     task = get(task_id)
     base = parse_day(task.get("planned_day")) or date.today()
     new_day = max(base + timedelta(days=days), date.today() + timedelta(days=days))
@@ -175,7 +175,7 @@ def counts() -> dict[str, int]:
                  (SELECT COUNT(*) FROM tasks WHERE status='open'
                     AND planned_day=date('now','localtime')) AS heute,
                  (SELECT COUNT(*) FROM tasks WHERE status='open'
-                    AND due_date < date('now','localtime')) AS ueberfaellig,
+                    AND due_date < date('now','localtime')) AS überfällig,
                  (SELECT COUNT(*) FROM tasks WHERE status='done'
                     AND done_at=date('now','localtime')) AS heute_erledigt
             """).fetchone()

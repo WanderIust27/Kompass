@@ -1,0 +1,240 @@
+/* Kompass — dunkel, ruhig, wenig Farbe.
+   Gestaltungsprinzip: Es soll sich anfuehlen wie ein aufgeraeumter
+   Schreibtisch, nicht wie ein Cockpit. Ein einziger Akzentton, und der
+   taucht nur dort auf, wo etwas eine Entscheidung verlangt. */
+:root {
+  --bg: #0e1013;
+  --surface: #16191d;
+  --surface-2: #1d2126;
+  --border: #262b31;
+  --border-soft: #1e2228;
+  --ink: #e6e5e2;
+  --ink-2: #9aa0a8;
+  --ink-3: #6a7079;
+  --accent: #5d94a8;          /* die Nadel */
+  --accent-soft: rgba(93, 148, 168, 0.13);
+  --good: #5f9c74;
+  --warn: #c9973f;
+  --bad: #c06255;
+  --radius: 10px;
+  --fs: 16px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--fs);
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 40px;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ Kopf */
+header.topbar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 20px 10px;
+  max-width: 1080px; margin: 0 auto;
+}
+.logo {
+  font-weight: 600; font-size: 0.95em; letter-spacing: 3.5px;
+  text-transform: uppercase;
+}
+.logo .needle { color: var(--accent); }
+.badge {
+  margin-left: auto; font-size: 0.78em; color: var(--ink-3);
+  cursor: pointer; padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--border); background: transparent;
+  font-family: inherit;
+}
+.badge.ok { color: var(--ink-2); }
+.badge.err { color: var(--bad); border-color: rgba(192, 98, 85, .4); }
+
+/* ------------------------------------------------------- Ein Feld fuer alles */
+.capture {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; gap: 8px;
+  max-width: 1080px; margin: 0 auto; padding: 8px 20px 12px;
+  background: linear-gradient(var(--bg) 72%, transparent);
+}
+.capture.inline { position: static; padding: 12px 0 0; background: none; }
+.capture input {
+  flex: 1; min-width: 0;
+}
+
+/* ------------------------------------------------------------------ Reiter */
+nav.tabs {
+  display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
+  max-width: 1080px; margin: 0 auto 14px; padding: 0 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+nav.tabs::-webkit-scrollbar { display: none; }
+nav.tabs button {
+  flex: 0 0 auto; background: none; border: none; color: var(--ink-3);
+  font: inherit; font-size: 0.88em; padding: 8px 10px 10px; cursor: pointer;
+  border-bottom: 2px solid transparent; white-space: nowrap;
+}
+nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent); }
+.dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); vertical-align: middle; margin-left: 2px;
+}
+
+main { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* ------------------------------------------------------------------ Karten */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+}
+.card-head {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;
+}
+.card-head h3 {
+  margin: 0; font-size: 0.82em; font-weight: 600; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.head-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.prose { white-space: pre-wrap; }
+.muted { color: var(--ink-2); }
+.small { font-size: 0.85em; }
+.dim { color: var(--ink-2); font-size: 0.9em; }
+
+/* ---------------------------------------------------------------- Elemente */
+button, input, select, textarea {
+  font: inherit; color: var(--ink);
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 11px;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--accent);
+}
+textarea { width: 100%; resize: vertical; }
+.btn { cursor: pointer; white-space: nowrap; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.accent {
+  background: var(--accent-soft); border-color: rgba(93, 148, 168, .45);
+  color: var(--ink);
+}
+.btn.accent:hover { border-color: var(--accent); }
+.btn.small { padding: 5px 10px; font-size: 0.84em; }
+.btn.ghost { background: transparent; }
+.btn.danger:hover { border-color: var(--bad); color: var(--bad); }
+select.small { padding: 5px 8px; font-size: 0.84em; }
+label { display: flex; flex-direction: column; gap: 4px;
+        font-size: 0.82em; color: var(--ink-2); }
+label input, label select { color: var(--ink); font-size: 1rem; }
+
+.form-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px; margin-top: 10px;
+}
+.form-grid .span2 { grid-column: 1 / -1; }
+.adder { margin-top: 12px; }
+.adder summary {
+  cursor: pointer; color: var(--ink-3); font-size: 0.85em; list-style: none;
+}
+.adder summary::before { content: "+ "; color: var(--accent); }
+.adder[open] summary { color: var(--ink-2); }
+
+.pill {
+  font-size: 0.78em; padding: 3px 10px; border-radius: 20px;
+  border: 1px solid var(--border); color: var(--ink-2);
+}
+.pill.warn { color: var(--warn); border-color: rgba(201, 151, 63, .4); }
+.pill.bad { color: var(--bad); border-color: rgba(192, 98, 85, .4); }
+.pill.good { color: var(--good); border-color: rgba(95, 156, 116, .4); }
+
+/* ------------------------------------------------------------------ Listen */
+.list { display: flex; flex-direction: column; }
+.row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 0; border-top: 1px solid var(--border-soft);
+}
+.list .row:first-child { border-top: none; }
+.row .grow { flex: 1; min-width: 0; }
+.row .title { display: block; }
+.row .meta { font-size: 0.8em; color: var(--ink-3); }
+.row.done .title { text-decoration: line-through; color: var(--ink-3); }
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+/* In der Inbox stehen die Knoepfe unter den Feldern, nicht daneben — sonst
+   bleibt fuer das Titelfeld auf dem Telefon kaum Platz. */
+.row-actions.spread { margin: 8px 0 0; }
+.empty { color: var(--ink-3); font-size: 0.9em; padding: 10px 0; }
+
+/* Abhaken: ein grosser, ruhiger Kreis statt einer Checkbox */
+.check {
+  flex: 0 0 auto; width: 22px; height: 22px; margin-top: 2px;
+  border-radius: 50%; border: 1.5px solid var(--ink-3);
+  background: transparent; cursor: pointer; padding: 0;
+}
+.check:hover { border-color: var(--accent); }
+.check.on { background: var(--accent-soft); border-color: var(--accent); }
+
+/* -------------------------------------------------------------- Fortschritt */
+.bar {
+  height: 6px; background: var(--surface-2); border-radius: 3px;
+  overflow: hidden; margin: 6px 0;
+}
+.bar-fill { height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+.bar-fill.over { background: var(--warn); }
+.stat-row { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+.stat-row div { font-size: 0.85em; color: var(--ink-2); }
+.stat-row b { display: block; color: var(--ink); font-size: 1.25em; font-weight: 600; }
+
+/* ------------------------------------------------------------------ Skalen */
+.rating-row { display: flex; gap: 24px; margin-bottom: 10px; flex-wrap: wrap; }
+.scale { display: flex; gap: 5px; margin-top: 3px; }
+.scale button {
+  width: 34px; padding: 5px 0; text-align: center; cursor: pointer;
+  background: var(--surface-2);
+}
+.scale button.on { background: var(--accent-soft); border-color: var(--accent); }
+
+/* -------------------------------------------------------------------- Chat */
+.chat { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.msg { padding: 10px 12px; border-radius: 10px; max-width: 88%; white-space: pre-wrap; }
+.msg.user { align-self: flex-end; background: var(--accent-soft); }
+.msg.assistant { align-self: flex-start; background: var(--surface-2); }
+
+/* ---------------------------------------------------------------- Wochentage */
+.cap-grid {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px; margin-top: 10px;
+}
+.cap-grid label { align-items: center; font-size: 0.75em; }
+.cap-grid input { width: 100%; text-align: center; padding: 7px 2px; }
+
+/* ------------------------------------------------------------------- Toast */
+.toast {
+  position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+  background: var(--surface-2); border: 1px solid var(--border);
+  padding: 10px 16px; border-radius: 24px; font-size: 0.88em;
+  z-index: 50; max-width: 90vw;
+}
+.toast.err { border-color: rgba(192, 98, 85, .5); color: var(--bad); }
+
+/* ----------------------------------------------------------- Aufgeklapptes */
+.panel {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin: 8px 0 4px;
+}
+.panel h4 { margin: 0 0 6px; font-size: 0.85em; color: var(--ink-2); }
+.panel .q { margin-bottom: 8px; }
+.panel .q span { display: block; font-size: 0.85em; color: var(--ink-2); }
+.panel input, .panel textarea { width: 100%; margin-top: 3px; }
+.take { border-left: 2px solid var(--accent); padding-left: 10px; margin: 8px 0;
+        white-space: pre-wrap; }
+
+@media (min-width: 640px) {
+  .form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .form-grid .span2 { grid-column: span 2; }
+}

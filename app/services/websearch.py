@@ -2,7 +2,7 @@
 
 Bewusst eng gehalten: Es geht nur ein Suchbegriff hinaus, nie Notizen,
 Aufgaben oder sonst etwas aus deiner Datenbank. Mit ALLOW_WEB=0 ist hier
-komplett Schluss, dann arbeitet Kompass rein oertlich.
+komplett Schluss, dann arbeitet Kompass rein örtlich.
 """
 from __future__ import annotations
 
@@ -121,10 +121,10 @@ def fetch_text(url: str, limit: int = 6000) -> str:
     return _text(body)[:limit]
 
 
-# ------------------------------------------------------- Buecher und Filme
+# ------------------------------------------------------- Bücher und Filme
 
 def openlibrary(title: str, limit: int = 5) -> list[dict[str, Any]]:
-    """Buchdaten von OpenLibrary — frei, ohne Schluessel."""
+    """Buchdaten von OpenLibrary — frei, ohne Schlüssel."""
     if not ALLOW_WEB:
         return []
     try:
@@ -149,7 +149,7 @@ def openlibrary(title: str, limit: int = 5) -> list[dict[str, Any]]:
 
 
 def tmdb(title: str, kind: str = "movie", limit: int = 5) -> list[dict[str, Any]]:
-    """Film- und Seriendaten. Nur wenn ein TMDB-Schluessel hinterlegt ist."""
+    """Film- und Seriendaten. Nur wenn ein TMDB-Schlüssel hinterlegt ist."""
     if not ALLOW_WEB or not TMDB_API_KEY:
         return []
     path = "tv" if kind == "series" else "movie"
@@ -185,7 +185,7 @@ def review_query(title: str) -> str:
 
 
 def alternative_query(title: str) -> str:
-    return f"{title} Alternative guenstiger Vergleich"
+    return f"{title} Alternative günstiger Vergleich"
 
 
 def quote(term: str) -> str:

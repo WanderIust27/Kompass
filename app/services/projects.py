@@ -1,13 +1,13 @@
 """Ideen und Projekte — die Bremse.
 
-Der Ablauf, auf den sich alles hier zurueckfuehren laesst:
+Der Ablauf, auf den sich alles hier zurückführen lässt:
 
     reingeworfen  ->  Parkplatz (Karenzzeit)  ->  reif  ->  Ritual  ->  Projekt
 
-Zwei Regeln machen die Arbeit: Eine Idee darf waehrend der Karenz nicht
-gestartet werden, und es duerfen nur wenige Projekte gleichzeitig laufen.
-Beides ist in den Einstellungen veraenderbar; das Limit laesst sich mit
-Begruendung brechen, und die Begruendung wird aufgehoben.
+Zwei Regeln machen die Arbeit: Eine Idee darf während der Karenz nicht
+gestartet werden, und es dürfen nur wenige Projekte gleichzeitig laufen.
+Beides ist in den Einstellungen veränderbar; das Limit lässt sich mit
+Begründung brechen, und die Begründung wird aufgehoben.
 """
 from __future__ import annotations
 
@@ -77,7 +77,7 @@ def ideas(status: str | None = None) -> list[dict[str, Any]]:
 
 
 def ripen() -> int:
-    """Karenzzeiten ablaufen lassen. Laeuft taeglich im Hintergrund."""
+    """Karenzzeiten ablaufen lassen. Läuft täglich im Hintergrund."""
     with get_db() as db:
         cur = db.execute(
             "UPDATE ideas SET status='ripe' WHERE status='parked' AND ripe_at<=?",
@@ -109,7 +109,7 @@ def drop_idea(idea_id: int) -> dict[str, Any]:
 
 
 def sleep_idea(idea_id: int, days: int = 30) -> dict[str, Any]:
-    """Nochmal schlafen legen statt entscheiden. Zaehlt mit."""
+    """Nochmal schlafen legen statt entscheiden. Zählt mit."""
     with get_db() as db:
         db.execute(
             "UPDATE ideas SET status='parked', ripe_at=?, revived=revived+1 WHERE id=?",
@@ -140,7 +140,7 @@ def slots() -> dict[str, int]:
 def add_project(title: str, why: str | None = None, deadline: str | None = None,
                 next_action: str | None = None, from_idea_id: int | None = None,
                 override_reason: str | None = None) -> dict[str, Any]:
-    """Projekt starten. Ueber dem Limit nur mit Begruendung."""
+    """Projekt starten. Ueber dem Limit nur mit Begründung."""
     title = (title or "").strip()
     if not title:
         raise ValueError("Ein Projekt braucht einen Titel.")
@@ -148,7 +148,7 @@ def add_project(title: str, why: str | None = None, deadline: str | None = None,
     if state["free"] <= 0 and not override_reason:
         raise PermissionError(
             f"Du hast schon {state['used']} von {state['limit']} Projekten laufen. "
-            f"Schliess eines ab oder leg eines auf Eis — oder sag, warum dieses "
+            f"Schließ eines ab oder leg eines auf Eis — oder sag, warum dieses "
             f"wichtiger ist als die laufenden.")
     with get_db() as db:
         cur = db.execute(
@@ -164,7 +164,7 @@ def add_project(title: str, why: str | None = None, deadline: str | None = None,
                 "WHERE id=?", (project_id, today_str(), from_idea_id))
     if override_reason:
         log_event("projekte",
-                  f"WIP-Limit gebrochen fuer „{title}“ — Begruendung: {override_reason}")
+                  f"WIP-Limit gebrochen fuer „{title}“ — Begründung: {override_reason}")
     else:
         log_event("projekte", f"Projekt „{title}“ gestartet.")
     return get_project(project_id)
@@ -233,6 +233,70 @@ def delete_project(project_id: int) -> None:
 
 
 def stale(days: int = 14) -> list[dict[str, Any]]:
-    """Projekte, an denen lange nichts passiert ist — Stoff fuer den Wochenrueckblick."""
+    """Projekte, an denen lange nichts passiert ist — Stoff fuer den Wochenrückblick."""
     return [p for p in projects("active")
             if p.get("stale_days") is not None and p["stale_days"] >= days]
+
+
+# ------------------------------------------------------------------ Ritual
+
+def review(idea_id: int, answers: dict[str, str]) -> dict[str, Any]:
+    """Das Bewertungsritual: vier Fragen, dann eine ehrliche Einschätzung.
+
+    Die Fragen sind absichtlich unbequem. Wer sie beantwortet, hat die
+    halbe Entscheidung schon getroffen — das Modell sagt danach nur noch,
+    was es in den Antworten sieht.
+    """
+    import json as _json
+    import logging as _logging
+
+    from .ollama_client import OllamaUnavailable, generate
+
+    log = _logging.getLogger("kompass.ideen")
+    idea = get_idea(idea_id)
+    with get_db() as db:
+        db.execute("UPDATE ideas SET review_json=? WHERE id=?",
+                   (_json.dumps(answers, ensure_ascii=False), idea_id))
+
+    state = slots()
+    running = ", ".join(p["title"] for p in projects("active")) or "keine"
+    lines = [f"{label} — {answers.get(key, '(keine Antwort)')}"
+             for key, label in RITUAL_QUESTIONS]
+    prompt = (
+        f"Idee: {idea['title']}\n"
+        f"Notiz dazu: {idea.get('note') or '—'}\n"
+        f"Sie liegt seit {idea['created_at'][:10]} auf dem Parkplatz.\n"
+        f"Laufende Projekte ({state['used']} von {state['limit']}): {running}\n\n"
+        + "\n".join(lines)
+        + "\n\nSag in drei bis fuenf Sätzen, was du davon hältst: Ist das ein "
+          "Projekt oder ein Impuls? Passt es neben das, was schon läuft? Wenn "
+          "kein Platz frei ist, sag klar, was dafuer weichen müsste. Keine "
+          "Aufzählung, kein Vorwort.")
+    system = (
+        "Du bist Kompass, der Assistent eines Menschen mit ADHS. Bei neuen Ideen "
+        "bist du der Freund, der schon dreimal zugesehen hat, wie etwas nach zwei "
+        "Wochen liegen blieb — wohlwollend, aber nicht naiv. Du redest ihm nichts "
+        "aus, was trägt, und redest ihm nichts ein, was nicht trägt. Deutsch, "
+        "knapp, du duzt.")
+    take = None
+    try:
+        take = generate(prompt, system=system, temperature=0.5)
+    except OllamaUnavailable as e:
+        log.info("Keine Einschätzung möglich: %s", e)
+    if take:
+        with get_db() as db:
+            db.execute("UPDATE ideas SET ai_take=? WHERE id=?", (take, idea_id))
+    return get_idea(idea_id)
+
+
+def promote(idea_id: int, override_reason: str | None = None,
+            deadline: str | None = None, next_action: str | None = None) -> dict[str, Any]:
+    """Aus einer reifen Idee ein Projekt machen — wenn ein Platz frei ist."""
+    idea = get_idea(idea_id)
+    if not idea["is_ripe"] and idea["status"] == "parked":
+        raise PermissionError(
+            f"Die Idee liegt noch {idea['days_left']} Tag(e) in der Karenz. "
+            f"Das ist der Sinn der Sache.")
+    return add_project(idea["title"], why=idea.get("note"), deadline=deadline,
+                       next_action=next_action, from_idea_id=idea_id,
+                       override_reason=override_reason)

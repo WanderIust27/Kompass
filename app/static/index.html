@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1013">
+<title>Kompass</title>
+<link rel="stylesheet" href="/static/style.css?v={{V}}">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">KOM<span class="needle">P</span>ASS</div>
+  <button id="statusBadge" class="badge" title="Zustand">–</button>
+</header>
+
+<!-- Ein Feld fuer alles. Steht immer da, egal in welchem Reiter man ist:
+     Der teuerste Moment beim Aufschreiben ist die Frage "wohin damit". -->
+<div class="capture">
+  <input id="captureInput" type="text" autocomplete="off"
+         placeholder="Rein damit — Aufgabe, Idee, Notiz, Kauf …">
+  <button id="captureBtn" class="btn accent">Werfen</button>
+</div>
+
+<nav class="tabs">
+  <button data-view="today" class="active">Heute</button>
+  <button data-view="inbox">Inbox <span id="inboxDot" class="dot" hidden></span></button>
+  <button data-view="tasks">Aufgaben</button>
+  <button data-view="projects">Projekte</button>
+  <button data-view="home">Haushalt</button>
+  <button data-view="buy">Käufe</button>
+  <button data-view="notes">Notizen</button>
+  <button data-view="recs">Empfehlungen</button>
+  <button data-view="people">Menschen</button>
+  <button data-view="chat">Fragen</button>
+  <button data-view="more">Mehr</button>
+</nav>
+
+<main>
+
+<!-- ================================================================ HEUTE -->
+<section id="view-today" class="view active">
+  <div class="card briefing">
+    <div class="card-head">
+      <h3 id="briefingTitle">Heute</h3>
+      <div class="head-actions">
+        <button class="btn small" data-slot="morning">Morgen</button>
+        <button class="btn small" data-slot="evening">Abend</button>
+        <button class="btn small ghost" id="briefingRefresh" title="Neu schreiben">↻</button>
+      </div>
+    </div>
+    <div id="briefingText" class="prose">Wird geladen …</div>
+  </div>
+
+  <div class="card" id="capacityCard">
+    <div class="card-head"><h3>Der Tag</h3>
+      <div class="head-actions">
+        <button class="btn small ghost" id="replanBtn">Neu planen</button>
+      </div>
+    </div>
+    <div class="bar"><div id="capacityFill" class="bar-fill"></div></div>
+    <div class="muted small" id="capacityText">–</div>
+  </div>
+
+  <div class="card" id="decisionsCard" hidden>
+    <div class="card-head"><h3>Warten auf dich</h3></div>
+    <div id="decisions"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Aufgaben</h3></div>
+    <div id="todayTasks" class="list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Haushalt</h3></div>
+    <div id="todayRoutines" class="list"></div>
+  </div>
+
+  <div class="card" id="checkinCard">
+    <div class="card-head"><h3>Abend-Check-in</h3></div>
+    <div class="rating-row">
+      <div><div class="muted small">Stimmung</div><div class="scale" id="scaleMood"></div></div>
+      <div><div class="muted small">Energie</div><div class="scale" id="scaleEnergy"></div></div>
+    </div>
+    <input id="checkinNote" type="text" placeholder="Ein Satz — was hat gebremst?">
+    <button class="btn" id="checkinSave">Eintragen</button>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Was ich verändert habe</h3></div>
+    <div id="eventList" class="list dim"></div>
+  </div>
+</section>
+
+<!-- ================================================================ INBOX -->
+<section id="view-inbox" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Unsortiert</h3>
+      <div class="head-actions">
+        <button class="btn small" id="sortAllBtn">Alle einschätzen</button>
+        <button class="btn small ghost" id="inboxHistoryBtn">Erledigte zeigen</button>
+      </div>
+    </div>
+    <div class="muted small">Jeder Zuruf landet hier. Kompass schlägt eine Schublade
+      vor, du bestätigst oder änderst sie.</div>
+    <div id="inboxList" class="list"></div>
+  </div>
+</section>
+
+<!-- ============================================================= AUFGABEN -->
+<section id="view-tasks" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Neue Aufgabe</h3></div>
+    <div class="form-grid">
+      <input id="taskTitle" type="text" placeholder="Was ist zu tun?" class="span2">
+      <input id="taskMin" type="number" min="1" placeholder="Minuten">
+      <select id="taskEnergy">
+        <option value="niedrig">wenig Energie</option>
+        <option value="mittel" selected>mittlere Energie</option>
+        <option value="hoch">volle Energie</option>
+      </select>
+      <select id="taskContext">
+        <option value="">ohne Ort</option>
+        <option value="zuhause">zuhause</option>
+        <option value="laptop">am Laptop</option>
+        <option value="unterwegs">unterwegs</option>
+        <option value="telefon">am Telefon</option>
+      </select>
+      <input id="taskDue" type="date">
+      <select id="taskProject"><option value="">ohne Projekt</option></select>
+      <button class="btn accent" id="taskAdd">Anlegen</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Offen</h3>
+      <div class="head-actions">
+        <select id="taskFilterEnergy" class="small">
+          <option value="">alle Energien</option>
+          <option value="niedrig">wenig Energie</option>
+          <option value="mittel">mittel</option>
+          <option value="hoch">viel</option>
+        </select>
+        <select id="taskFilterContext" class="small">
+          <option value="">überall</option>
+          <option value="zuhause">zuhause</option>
+          <option value="laptop">Laptop</option>
+          <option value="unterwegs">unterwegs</option>
+          <option value="telefon">Telefon</option>
+        </select>
+        <select id="taskFilterStatus" class="small">
+          <option value="open">offen</option>
+          <option value="done">erledigt</option>
+          <option value="alle">alle</option>
+        </select>
+      </div>
+    </div>
+    <div id="taskList" class="list"></div>
+  </div>
+</section>
+
+<!-- ============================================================= PROJEKTE -->
+<section id="view-projects" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Laufende Projekte</h3>
+      <div class="head-actions"><span id="slotBadge" class="pill">–</span></div>
+    </div>
+    <div id="projectList" class="list"></div>
+    <details class="adder">
+      <summary>Projekt direkt anlegen</summary>
+      <div class="form-grid">
+        <input id="projTitle" type="text" placeholder="Titel" class="span2">
+        <input id="projWhy" type="text" placeholder="Woran merkst du, dass es fertig ist?" class="span2">
+        <input id="projNext" type="text" placeholder="Erster konkreter Schritt">
+        <input id="projDeadline" type="date">
+        <button class="btn accent" id="projAdd">Starten</button>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Parkplatz</h3>
+      <div class="head-actions"><span class="muted small" id="cooldownHint"></span></div>
+    </div>
+    <div class="muted small">Jede Idee liegt erst ihre Karenzzeit hier. Was danach
+      noch trägt, darf Projekt werden — wenn ein Platz frei ist.</div>
+    <div id="ideaList" class="list"></div>
+  </div>
+</section>
+
+<!-- ============================================================= HAUSHALT -->
+<section id="view-home" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Heute fällig</h3>
+      <div class="head-actions"><span id="homeStats" class="muted small"></span></div>
+    </div>
+    <div id="homeDue" class="list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Alle Routinen</h3></div>
+    <div id="homeAll" class="list"></div>
+    <details class="adder">
+      <summary>Routine hinzufügen</summary>
+      <div class="form-grid">
+        <input id="routTitle" type="text" placeholder="Was?" class="span2">
+        <input id="routRoom" type="text" placeholder="Raum">
+        <input id="routInterval" type="number" min="1" placeholder="alle wie viel Tage?">
+        <input id="routMin" type="number" min="1" placeholder="Minuten">
+        <button class="btn accent" id="routAdd">Anlegen</button>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ================================================================ KÄUFE -->
+<section id="view-buy" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Neuer Wunsch</h3></div>
+    <div class="form-grid">
+      <input id="buyTitle" type="text" placeholder="Was willst du haben?" class="span2">
+      <input id="buyPrice" type="number" step="0.01" placeholder="Preis in Euro">
+      <input id="buyUrl" type="text" placeholder="Link (optional)">
+      <input id="buyReason" type="text" placeholder="Warum?" class="span2">
+      <button class="btn accent" id="buyAdd">Auf die Warteliste</button>
+    </div>
+    <div class="muted small" id="buyRuleHint"></div>
+  </div>
+
+  <div class="card" id="budgetCard">
+    <div class="card-head"><h3>Budget</h3></div>
+    <div class="bar"><div id="budgetFill" class="bar-fill"></div></div>
+    <div class="muted small" id="budgetText">–</div>
+    <div class="stat-row" id="buyStats"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Entscheidung fällig</h3></div>
+    <div id="buyReady" class="list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Wartet noch</h3></div>
+    <div id="buyWaiting" class="list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Erledigt</h3>
+      <div class="head-actions"><button class="btn small ghost" id="buyHistoryBtn">Zeigen</button></div>
+    </div>
+    <div id="buyHistory" class="list"></div>
+  </div>
+</section>
+
+<!-- ============================================================== NOTIZEN -->
+<section id="view-notes" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Suchen</h3>
+      <div class="head-actions"><span class="muted small" id="noteStats"></span></div>
+    </div>
+    <input id="noteSearch" type="search" placeholder="Wort oder Sinn — beides wird durchsucht">
+    <div id="noteList" class="list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Neue Notiz</h3></div>
+    <input id="noteTitle" type="text" placeholder="Titel (optional)">
+    <textarea id="noteBody" rows="5" placeholder="Text"></textarea>
+    <div class="form-grid">
+      <input id="noteTags" type="text" placeholder="Schlagworte, mit Komma">
+      <button class="btn accent" id="noteAdd">Speichern</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= EMPFEHLUNGEN -->
+<section id="view-recs" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Vorschläge</h3>
+      <div class="head-actions">
+        <select id="recKind" class="small"></select>
+        <button class="btn small accent" id="recSuggest">Hol mir welche</button>
+      </div>
+    </div>
+    <input id="recHint" type="text" placeholder="Wunsch dazu (optional), z. B. „etwas Leichtes“">
+    <div id="recSuggestions" class="list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Meine Liste</h3>
+      <div class="head-actions">
+        <select id="recFilter" class="small">
+          <option value="queued">vorgemerkt</option>
+          <option value="doing">gerade dabei</option>
+          <option value="done">durch</option>
+          <option value="alle">alle</option>
+        </select>
+      </div>
+    </div>
+    <div id="recList" class="list"></div>
+    <details class="adder">
+      <summary>Von Hand eintragen</summary>
+      <div class="form-grid">
+        <input id="recTitle" type="text" placeholder="Titel" class="span2">
+        <input id="recCreator" type="text" placeholder="Von wem">
+        <select id="recAddKind"></select>
+        <button class="btn accent" id="recAdd">Merken</button>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ============================================================= MENSCHEN -->
+<section id="view-people" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Wäre mal dran</h3></div>
+    <div id="peopleDue" class="list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Alle</h3></div>
+    <div id="peopleList" class="list"></div>
+    <details class="adder">
+      <summary>Person hinzufügen</summary>
+      <div class="form-grid">
+        <input id="perName" type="text" placeholder="Name" class="span2">
+        <input id="perBirthday" type="date">
+        <input id="perCadence" type="number" min="1" placeholder="alle wie viel Tage melden?">
+        <input id="perNote" type="text" placeholder="Was du dir merken willst" class="span2">
+        <button class="btn accent" id="perAdd">Anlegen</button>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ================================================================ FRAGEN -->
+<section id="view-chat" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Kompass fragen</h3>
+      <div class="head-actions"><button class="btn small ghost" id="chatClear">Leeren</button></div>
+    </div>
+    <div class="muted small">Er kennt deinen Stand. Eintragen kann er nichts —
+      dafür ist die Inbox da.</div>
+    <div id="chatLog" class="chat"></div>
+    <div class="capture inline">
+      <input id="chatInput" type="text" placeholder="Frag was …">
+      <button class="btn accent" id="chatSend">Fragen</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== MEHR -->
+<section id="view-more" class="view">
+  <div class="card">
+    <div class="card-head"><h3>Deine Zeit</h3></div>
+    <div class="muted small">Wie viele Minuten du an einem Wochentag realistisch
+      für Aufgaben und Haushalt hast. Danach plant Kompass.</div>
+    <div id="capacityGrid" class="cap-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Regeln</h3></div>
+    <div class="form-grid">
+      <label>Karenzzeit für Ideen (Tage)<input id="setCooldown" type="number" min="0"></label>
+      <label>Projekte gleichzeitig<input id="setWip" type="number" min="1"></label>
+      <label>Warten ab … Euro<input id="setBuySmall" type="number" min="0"></label>
+      <label>… Stunden<input id="setBuySmallH" type="number" min="0"></label>
+      <label>Länger warten ab … Euro<input id="setBuyBig" type="number" min="0"></label>
+      <label>… Stunden<input id="setBuyBigH" type="number" min="0"></label>
+      <label>Monatsbudget (Euro)<input id="setBudget" type="number" min="0"></label>
+      <label>Nutzung prüfen nach (Tagen)<input id="setUsage" type="number" min="1"></label>
+      <label>Briefing morgens (Stunde)<input id="setMorning" type="number" min="0" max="23"></label>
+      <label>Check-in abends (Stunde)<input id="setEvening" type="number" min="0" max="23"></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Ton</h3></div>
+    <div class="form-grid">
+      <label>Wie er mit dir redet
+        <select id="setTone">
+          <option value="direkt">direkt</option>
+          <option value="freundlich">freundlich</option>
+          <option value="trocken">trocken</option>
+        </select>
+      </label>
+      <label>Dein Name<input id="setName" type="text" placeholder="optional"></label>
+    </div>
+    <button class="btn accent" id="saveSettings">Speichern</button>
+    <span id="settingsSaved" class="muted small"></span>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Was er über dich weiß</h3>
+      <div class="head-actions"><button class="btn small ghost" id="profileRefresh">Neu rechnen</button></div>
+    </div>
+    <div id="profileList" class="list dim"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Modell</h3></div>
+    <div id="modelList" class="list"></div>
+    <div class="muted small" id="modelHint"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Zustand</h3></div>
+    <div id="statusBlock" class="list dim"></div>
+  </div>
+</section>
+
+</main>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="/static/app.js?v={{V}}"></script>
+</body>
+</html>

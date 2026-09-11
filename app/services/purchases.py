@@ -1,8 +1,8 @@
-"""Kaufberatung — Wartefrist, Verhoer, Recherche, Budget, spaetere Ehrlichkeit.
+"""Kaufberatung — Wartefrist, Verhör, Recherche, Budget, spätere Ehrlichkeit.
 
 Die Reihenfolge ist Absicht. Erst wartet der Kauf, dann wird gefragt, dann
-erst darf recherchiert werden — wer mit der Recherche anfaengt, hat sich in
-der Regel schon entschieden und sucht nur noch Bestaetigung.
+erst darf recherchiert werden — wer mit der Recherche anfängt, hat sich in
+der Regel schon entschieden und sucht nur noch Bestätigung.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from .ollama_client import OllamaUnavailable, generate, generate_json
 log = logging.getLogger("kompass.kauf")
 
 QUESTIONS = [
-    ("problem", "Welches Problem loest es — heute, nicht theoretisch?"),
+    ("problem", "Welches Problem löst es — heute, nicht theoretisch?"),
     ("current", "Was benutzt du dafuer gerade, und warum reicht das nicht?"),
     ("without", "Was passiert, wenn du es nicht kaufst?"),
     ("future", "Wo steht das Ding in drei Monaten?"),
@@ -107,7 +107,7 @@ def query(status: str | None = None) -> list[dict[str, Any]]:
 
 
 def ripen() -> int:
-    """Abgelaufene Wartefristen freigeben. Laeuft im Hintergrund."""
+    """Abgelaufene Wartefristen freigeben. Läuft im Hintergrund."""
     now = datetime.now().isoformat(sep=" ")
     with get_db() as db:
         cur = db.execute(
@@ -115,12 +115,12 @@ def ripen() -> int:
             (now,))
         count = cur.rowcount or 0
     if count:
-        log_event("kaeufe", f"{count} Wunsch/Wuensche haben die Wartefrist hinter sich.")
+        log_event("käufe", f"{count} Wunsch/Wünsche haben die Wartefrist hinter sich.")
     return count
 
 
 def answer(purchase_id: int, answers: dict[str, str]) -> dict[str, Any]:
-    """Antworten aus dem Verhoer festhalten und das Modell draufschauen lassen."""
+    """Antworten aus dem Verhör festhalten und das Modell draufschauen lassen."""
     item = get(purchase_id)
     with get_db() as db:
         db.execute("UPDATE purchases SET answers_json=? WHERE id=?",
@@ -139,30 +139,30 @@ def _ai_take(item: dict[str, Any], answers: dict[str, str]) -> str | None:
     prompt = (
         f"Wunsch: {item['title']}\n"
         f"Preis: {item.get('price_eur') or 'unbekannt'} Euro\n"
-        f"Begruendung beim Eintragen: {item.get('reason') or '—'}\n\n"
+        f"Begründung beim Eintragen: {item.get('reason') or '—'}\n\n"
         + "\n".join(lines)
         + (f"\n\nBudget diesen Monat: {budget['spent']:.0f} von "
            f"{budget['budget']:.0f} Euro schon ausgegeben."
            if budget.get("budget") else "")
-        + "\n\nSchreib drei bis fuenf Saetze: Wo die Antworten tragen und wo sie "
-          "duenn sind, und was du an seiner Stelle taetest. Keine Ueberschriften, "
-          "keine Aufzaehlung, kein Vorwort.")
+        + "\n\nSchreib drei bis fuenf Sätze: Wo die Antworten tragen und wo sie "
+          "dünn sind, und was du an seiner Stelle tätest. Keine Ueberschriften, "
+          "keine Aufzählung, kein Vorwort.")
     try:
         return generate(prompt, system=_SYSTEM, temperature=0.5)
     except OllamaUnavailable as e:
-        log.info("Keine Einschaetzung moeglich: %s", e)
+        log.info("Keine Einschätzung möglich: %s", e)
         return None
 
 
 _SYSTEM = (
     "Du bist Kompass, der Alltagsassistent eines Menschen mit ADHS. "
     "Beim Thema Kaufen bist du der ruhige Freund, der nicht moralisiert, aber "
-    "auch nicht mitschwaermt. Du duzt. Du sagst klar, was du denkst, und "
+    "auch nicht mitschwärmt. Du duzt. Du sagst klar, was du denkst, und "
     "erfindest keine Preise oder Testergebnisse. Deutsch, knapp, ohne Floskeln.")
 
 
 def research(purchase_id: int) -> dict[str, Any]:
-    """Im Netz nachsehen: Preis, Kritik, guenstigere Alternative."""
+    """Im Netz nachsehen: Preis, Kritik, günstigere Alternative."""
     item = get(purchase_id)
     if not websearch.enabled():
         raise websearch.WebDisabled(
@@ -174,7 +174,7 @@ def research(purchase_id: int) -> dict[str, Any]:
                          ("alternativen", websearch.alternative_query(title))):
         try:
             found["treffer"][label] = websearch.search(query, limit=5)
-        except Exception as e:                       # Netz ist unzuverlaessig
+        except Exception as e:                       # Netz ist unzuverlässig
             log.info("Suche '%s' fehlgeschlagen: %s", query, e)
             found["treffer"][label] = []
 
@@ -186,14 +186,14 @@ def research(purchase_id: int) -> dict[str, Any]:
     if digest:
         prompt = (f"Wunsch: {title} (etwa {item.get('price_eur') or '?'} Euro)\n\n"
                   "Suchergebnisse:\n" + "\n".join(digest[:14]) +
-                  "\n\nFass zusammen, was davon wirklich brauchbar ist: uebliche "
-                  "Preisspanne, die haeufigste Kritik, und ob es eine guenstigere "
+                  "\n\nFass zusammen, was davon wirklich brauchbar ist: übliche "
+                  "Preisspanne, die häufigste Kritik, und ob es eine günstigere "
                   "oder gebrauchte Alternative gibt. Wenn die Ergebnisse nichts "
-                  "hergeben, sag genau das. Hoechstens sechs Saetze.")
+                  "hergeben, sag genau das. Höchstens sechs Sätze.")
         try:
             summary = generate(prompt, system=_SYSTEM, temperature=0.4)
         except OllamaUnavailable as e:
-            log.info("Zusammenfassung nicht moeglich: %s", e)
+            log.info("Zusammenfassung nicht möglich: %s", e)
     found["zusammenfassung"] = summary
     with get_db() as db:
         db.execute("UPDATE purchases SET research_json=? WHERE id=?",
@@ -202,7 +202,7 @@ def research(purchase_id: int) -> dict[str, Any]:
 
 
 def decide(purchase_id: int, verdict: str, price: float | None = None) -> dict[str, Any]:
-    """gekauft | verworfen — beides zaehlt fuer deine Trefferquote."""
+    """gekauft | verworfen — beides zählt fuer deine Trefferquote."""
     item = get(purchase_id)
     now = today_str()
     if verdict == "gekauft":
@@ -214,12 +214,12 @@ def decide(purchase_id: int, verdict: str, price: float | None = None) -> dict[s
                        bought_price=?, usage_check_at=? WHERE id=?""",
                 (now, now, _as_price(price) if price is not None
                  else item.get("price_eur"), check_at, purchase_id))
-        log_event("kaeufe", f"Gekauft: {item['title']}.")
+        log_event("käufe", f"Gekauft: {item['title']}.")
     else:
         with get_db() as db:
             db.execute("UPDATE purchases SET status='dropped', decided_at=? WHERE id=?",
                        (now, purchase_id))
-        log_event("kaeufe",
+        log_event("käufe",
                   f"Verworfen: {item['title']}"
                   + (f" — {item['price_eur']:.0f} Euro nicht ausgegeben."
                      if item.get("price_eur") else "."))
@@ -232,7 +232,7 @@ def delete(purchase_id: int) -> None:
 
 
 def usage_due() -> list[dict[str, Any]]:
-    """Gekauftes, bei dem die Nachfrage ansteht: benutzt du es ueberhaupt?"""
+    """Gekauftes, bei dem die Nachfrage ansteht: benutzt du es überhaupt?"""
     with get_db() as db:
         rows = db.execute(
             "SELECT * FROM purchases WHERE status='bought' AND usage_verdict IS NULL "
@@ -266,7 +266,7 @@ def budget_state(month: str | None = None) -> dict[str, Any]:
 
 
 def stats() -> dict[str, Any]:
-    """Deine Trefferquote — das Argument, das beim naechsten Mal wirkt."""
+    """Deine Trefferquote — das Argument, das beim nächsten Mal wirkt."""
     with get_db() as db:
         row = db.execute(
             """SELECT
