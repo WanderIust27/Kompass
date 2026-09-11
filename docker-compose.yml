@@ -1,0 +1,45 @@
+services:
+  kompass:
+    build: .
+    container_name: kompass
+    restart: unless-stopped
+    ports:
+      # Host-Port ueber die .env aenderbar (KOMPASS_PORT), Standard 1338.
+      # PULS liegt auf 1337 — die beiden kommen sich nicht in die Quere.
+      - "${KOMPASS_PORT:-1338}:8000"
+    environment:
+      - TZ=${TZ:-Europe/Berlin}
+      # Kompass benutzt das Ollama, das schon fuer PULS laeuft. Bei 8 GB VRAM
+      # ist das der richtige Weg: ein Modell im Speicher statt zwei, die sich
+      # gegenseitig rauswerfen. deploy.sh haengt puls-ollama ins Netz unten.
+      - OLLAMA_URL=${OLLAMA_URL:-http://puls-ollama:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen3:8b}
+      # Kleines Zusatzmodell fuer die semantische Notizsuche (~270 MB).
+      - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
+      # Leer = offen im Heimnetz. Gesetzt = jede Anfrage braucht den Token.
+      - KOMPASS_TOKEN=${KOMPASS_TOKEN:-}
+      # Internet fuer Kaufrecherche und Buch-/Filmdaten. 0 = komplett offline.
+      - ALLOW_WEB=${ALLOW_WEB:-1}
+      # Optional: eigene SearXNG-Instanz statt DuckDuckGo
+      - SEARXNG_URL=${SEARXNG_URL:-}
+      # Optional: TMDB-Schluessel fuer Film- und Seriendaten
+      - TMDB_API_KEY=${TMDB_API_KEY:-}
+    volumes:
+      - kompass-data:/data
+    networks:
+      - default
+      - ki
+
+# Das gemeinsame Netz zu puls-ollama. deploy.sh legt es an und haengt den
+# Ollama-Container hinein — auf dem Server muss dafuer nichts von Hand passieren.
+networks:
+  ki:
+    external: true
+    name: kompass-ki
+
+# Bewusst "external": dann heisst das Volume exakt kompass-data, egal wie der
+# Stack heisst. Einmalig anlegen (schadet nicht, wenn es schon existiert):
+#     docker volume create kompass-data
+volumes:
+  kompass-data:
+    external: true
