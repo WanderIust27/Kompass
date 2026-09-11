@@ -120,10 +120,15 @@ def pull_model(name: str | None = None) -> None:
 
 
 def generate(prompt: str, system: str | None = None, json_mode: bool = False,
-             temperature: float = 0.7, num_ctx: int = 8192) -> str:
-    """Eine Antwort vom lokalen Modell holen."""
+             temperature: float = 0.7, num_ctx: int = 8192,
+             model: str | None = None) -> str:
+    """Eine Antwort vom lokalen Modell holen.
+
+    Mit `model` lässt sich ein anderes Modell ansprechen als das eingestellte —
+    der Anschub darf einen eigenen Kopf haben.
+    """
     payload: dict[str, Any] = {
-        "model": active_model(),
+        "model": model or active_model(),
         "prompt": prompt,
         "stream": False,
         "options": {"temperature": temperature, "num_ctx": num_ctx},
@@ -157,9 +162,10 @@ def chat(messages: list[dict[str, str]], system: str | None = None,
 
 
 def generate_json(prompt: str, system: str | None = None,
-                  temperature: float = 0.3) -> dict[str, Any]:
+                  temperature: float = 0.3, model: str | None = None) -> dict[str, Any]:
     """JSON-Antwort erzwingen und robust parsen."""
-    text = generate(prompt, system=system, json_mode=True, temperature=temperature)
+    text = generate(prompt, system=system, json_mode=True, temperature=temperature,
+                    model=model)
     try:
         return json.loads(text)
     except json.JSONDecodeError:

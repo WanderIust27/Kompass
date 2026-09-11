@@ -115,6 +115,17 @@ with TestClient(app) as c:
                                                           "rating": 5}))
     ok("Sorten", c.get("/api/recs/meta"))
 
+    print("\n— Anschub —")
+    nudge = ok("Hinweis", c.get("/api/unblock/nudge")).json()
+    check("er rechnet Signale mit", "signale" in nudge, True)
+    step = ok("Einstieg", c.post("/api/unblock", json={"feeling": "keine Ahnung wo anfangen"})).json()
+    check("es kommt genau ein Schritt", bool(step["schritt"]), True)
+    check("mit einer Dauer unter sechs Minuten", step["dauer_min"] <= 5, True)
+    ok("Ergebnis melden", c.post(f"/api/unblock/{step['id_log']}/outcome",
+                                 json={"verdict": "geschafft"}))
+    hist = ok("Verlauf", c.get("/api/unblock/history")).json()
+    check("der Verlauf zählt mit", hist["zahlen"]["geschafft"], 1)
+
     print("\n— Einstellungen, Modelle, Muster —")
     ok("Einstellungen lesen", c.get("/api/settings"))
     ok("Einstellungen schreiben", c.post("/api/settings", json={"wip_limit": "4"}))

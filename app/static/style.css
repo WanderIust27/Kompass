@@ -1,10 +1,13 @@
 /* Kompass — so wenig Oberfläche wie möglich.
 
    Leitsatz: Das Einzige, was Aufmerksamkeit bekommen darf, ist der Inhalt.
-   Deshalb keine Kästen, keine Rahmen um alles, keine Knöpfe auf Vorrat —
-   Trennlinien statt Container, Text statt Buttons, und Aktionen erscheinen
-   erst, wenn man eine Zeile antippt. Farbe gibt es genau an einer Stelle:
-   dort, wo etwas fertig ist. */
+   Keine Kästen, keine Rahmen um alles, keine Knöpfe auf Vorrat — Trennlinien
+   statt Container, Text statt Buttons, und Aktionen erscheinen erst, wenn man
+   eine Zeile antippt.
+
+   Breite: Auf dem Telefon eine Spalte. Ab Tabletbreite rückt alles Zweitrangige
+   nach rechts, statt sich unter den Inhalt zu stapeln — dann sieht man auf dem
+   Laptop den ganzen Tag ohne zu scrollen. */
 :root {
   --bg: #0e1013;
   --ink: #e7e6e3;          /* Inhalt: hoher Kontrast */
@@ -13,8 +16,10 @@
   --line: #22262b;         /* Trennlinien, kaum sichtbar */
   --field: #171a1e;
   --accent: #5d94a8;
+  --accent-soft: rgba(93, 148, 168, .13);
   --warn: #c9973f;
   --bad: #c06255;
+  --pad: 22px;
   --fs: 17px;
   color-scheme: dark;
 }
@@ -33,12 +38,14 @@ body {
   padding-bottom: 64px;
 }
 
-header {
-  display: flex; align-items: center; gap: 10px;
-  max-width: 680px; margin: 0 auto; padding: 22px 22px 6px;
+/* Eine gemeinsame Breite für Kopf, Eingabe, Reiter und Inhalt — sonst
+   wandert die Fluchtlinie beim Scrollen. */
+header, .capture, nav.tabs, main {
+  max-width: 720px; margin-left: auto; margin-right: auto;
 }
-.logo { font-size: 0.8em; letter-spacing: 2.5px; text-transform: uppercase;
-        color: var(--ink-3); }
+header { display: flex; align-items: center; gap: 10px; padding: 22px var(--pad) 6px; }
+.logo { font-size: 0.8em; letter-spacing: 3px; color: var(--ink-3); }
+.logo .needle { color: var(--accent); }
 /* Der Zustand ist ein Punkt, kein Etikett. Wer wissen will, was er bedeutet,
    tippt drauf. */
 .state {
@@ -48,9 +55,8 @@ header {
 .state.ok { background: var(--accent); }
 .state.err { background: var(--bad); }
 
-.capture { display: flex; gap: 8px; max-width: 680px; margin: 0 auto;
-           padding: 6px 22px 14px; }
-.capture.inline { padding: 14px 0 0; }
+.capture { display: flex; gap: 8px; padding: 6px var(--pad) 14px; }
+.capture.inline { padding: 14px 0 0; max-width: none; }
 .capture input { flex: 1; min-width: 0; }
 .capture button {
   flex: 0 0 auto; width: 44px; font-size: 1.2em; line-height: 1;
@@ -60,8 +66,8 @@ header {
 .capture button:hover { color: var(--accent); }
 
 nav.tabs {
-  display: flex; gap: 22px; max-width: 680px; margin: 0 auto 26px;
-  padding: 0 22px; border-bottom: 1px solid var(--line);
+  display: flex; gap: 22px; margin-bottom: 26px;
+  padding: 0 var(--pad); border-bottom: 1px solid var(--line);
 }
 nav.tabs button {
   background: none; border: none; padding: 0 0 10px; cursor: pointer;
@@ -72,7 +78,7 @@ nav.tabs button.active { color: var(--ink); border-bottom-color: var(--ink-2); }
 .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%;
        background: var(--accent); vertical-align: middle; }
 
-main { max-width: 680px; margin: 0 auto; padding: 0 22px; }
+main { padding: 0 var(--pad); }
 .view { display: none; }
 .view.active { display: block; }
 
@@ -90,18 +96,23 @@ textarea { resize: vertical; }
   padding: 9px 16px; cursor: pointer; color: var(--ink-2); width: auto;
 }
 .btn:hover { color: var(--ink); border-color: var(--ink-3); }
+.btn.accent { background: var(--accent-soft); border-color: rgba(93,148,168,.4);
+              color: var(--ink); }
+.btn.accent:hover { border-color: var(--accent); }
 /* Sekundäre Aktionen sind Text, keine Knöpfe. Ein Knopf ist ein Versprechen
    von Wichtigkeit — das kann man nicht zwölfmal pro Seite geben. */
 .link {
   background: none; border: none; padding: 0; cursor: pointer;
-  color: var(--ink-3); font-size: 0.85em; text-decoration: none;
+  color: var(--ink-3); font-size: 0.85em;
 }
 .link:hover { color: var(--ink-2); }
 
 .label { font-size: 0.78em; letter-spacing: 1.2px; text-transform: uppercase;
          color: var(--ink-3); margin: 32px 0 10px; }
+.col-side .label:first-child, .col-main > .label:first-child { margin-top: 0; }
 .quiet { color: var(--ink-3); font-size: 0.82em; margin-left: 8px; }
 p.quiet { margin: 0 0 12px; }
+.lead { color: var(--ink-2); max-width: 56ch; margin: 0 0 20px; }
 .foot { color: var(--ink-3); font-size: 0.85em; margin: 14px 0 0;
         display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .crumb { font-size: 0.92em; color: var(--ink-2); margin: 0 0 20px; }
@@ -109,24 +120,31 @@ p.quiet { margin: 0 0 12px; }
 .block { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 18px; }
 
 /* -------------------------------------------------------------- Briefing */
-.briefing { margin: 0 0 28px; line-height: 1.7; white-space: pre-wrap; }
+.briefing { margin: 0 0 26px; line-height: 1.7; max-width: 62ch;
+            white-space: pre-wrap; }
 .briefing:empty { display: none; }
 .briefing .again { margin-left: 8px; }
+
+/* Der ungefragte Hinweis, wenn Kompass Feststecken sieht. Genau einer. */
+.nudge {
+  border-left: 2px solid var(--accent); padding: 2px 0 2px 14px;
+  margin: 0 0 24px; color: var(--ink-2); max-width: 58ch;
+}
+.nudge button { display: block; margin-top: 6px; }
 
 /* ----------------------------------------------------------------- Zeilen */
 .list { display: flex; flex-direction: column; }
 .row { display: flex; align-items: baseline; gap: 13px; padding: 13px 0;
        border-top: 1px solid var(--line); }
 .list .row:first-child { border-top: none; }
-.row .grow { flex: 1; min-width: 0; cursor: default; }
+.row .grow { flex: 1; min-width: 0; }
 .row .title { display: block; }
 .row .meta { font-size: 0.8em; color: var(--ink-3); }
 .row .when { font-size: 0.8em; color: var(--ink-3); flex: 0 0 auto; }
 .row.gone { opacity: .35; }
 .row.gone .title { text-decoration: line-through; }
 
-/* Abhaken: ein ruhiger Kreis. Grosszügige Trefferfläche, damit man ihn
-   auf dem Telefon mit dem Daumen trifft. */
+/* Abhaken: ein ruhiger Kreis mit großzügiger, unsichtbarer Trefferfläche. */
 .check {
   flex: 0 0 auto; width: 20px; height: 20px; padding: 0; margin: 2px -8px 0 -8px;
   border: none; background: none; cursor: pointer; position: relative;
@@ -135,14 +153,12 @@ p.quiet { margin: 0 0 12px; }
   content: ""; position: absolute; inset: 0; border-radius: 50%;
   border: 1.5px solid var(--ink-3);
 }
-.check::after {
-  content: ""; position: absolute; inset: -12px;    /* unsichtbar, aber treffbar */
-}
+.check::after { content: ""; position: absolute; inset: -12px; }
 .check:hover::before { border-color: var(--accent); }
 .check.on::before { background: var(--accent); border-color: var(--accent); }
 
 /* Aktionen erscheinen erst beim Antippen der Zeile. */
-.acts { display: flex; gap: 14px; padding: 2px 0 4px; }
+.acts { display: flex; gap: 14px; padding: 2px 0 4px; flex-wrap: wrap; }
 .acts button { background: none; border: none; padding: 0; cursor: pointer;
                color: var(--ink-3); font-size: 0.82em; }
 .acts button:hover { color: var(--ink-2); }
@@ -153,12 +169,22 @@ p.quiet { margin: 0 0 12px; }
         padding-left: 12px; border-left: 1px solid var(--line);
         white-space: pre-wrap; }
 
+/* ---------------------------------------------------------------- Anschub */
+.step { margin: 22px 0 0; }
+.step .what { font-size: 1.35em; line-height: 1.35; }
+.step .why { color: var(--ink-2); margin-top: 8px; }
+.step .allow { color: var(--ink-3); font-size: 0.88em; margin-top: 14px; }
+.step .allow b { color: var(--ink-2); font-weight: 400; }
+.timer { font-size: 2.4em; letter-spacing: 2px; margin: 18px 0 4px;
+         color: var(--accent); }
+.timer.done { color: var(--ink); }
+
 /* -------------------------------------------------------------------- Hub */
 .hub { display: flex; flex-direction: column; }
 .hub button {
   display: flex; align-items: baseline; background: none; border: none;
   border-top: 1px solid var(--line); padding: 16px 0; cursor: pointer;
-  text-align: left; color: var(--ink); width: 100%;
+  text-align: left; color: var(--ink); width: 100%; font-size: 1rem;
 }
 .hub button:first-child { border-top: none; }
 .hub em { margin-left: auto; font-style: normal; font-size: 0.82em;
@@ -167,13 +193,13 @@ p.quiet { margin: 0 0 12px; }
 
 /* ---------------------------------------------------------------- Formulare */
 .adder { margin-top: 26px; }
+.col-side .adder:first-child { margin-top: 0; }
 .adder summary { cursor: pointer; color: var(--ink-3); font-size: 0.85em;
                  list-style: none; }
 .adder summary::-webkit-details-marker { display: none; }
 .adder summary::before { content: "+ "; }
 .adder > * { margin-top: 8px; }
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.fields.wide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .fields label { display: flex; flex-direction: column; gap: 4px;
                 font-size: 0.78em; color: var(--ink-3); }
 
@@ -184,8 +210,7 @@ details.block > summary::before { content: "› "; color: var(--ink-3); }
 details.block[open] > summary::before { content: "⌄ "; }
 details.block > *:not(summary) { margin-top: 14px; }
 
-.cap-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
-            gap: 5px; }
+.cap-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
 .cap-grid label { display: flex; flex-direction: column; align-items: center;
                   gap: 4px; font-size: 0.72em; color: var(--ink-3); }
 .cap-grid input { text-align: center; padding: 8px 2px; }
@@ -209,6 +234,30 @@ details.block > *:not(summary) { margin-top: 14px; }
 }
 .toast.err { color: var(--bad); }
 
+/* --------------------------------------------------------------- Breiten */
+/* Unter 900px bleibt alles gestapelt: erst der Inhalt, dann das Beiwerk. */
+.col-side { margin-top: 30px; }
+
 @media (min-width: 560px) {
-  .fields, .fields.wide { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (min-width: 900px) {
+  header, .capture, nav.tabs, main { max-width: 1120px; }
+  /* Nur die SICHTBARE Ansicht wird zum Raster. Ohne das .active hier
+     überschreibt die Regel das display:none der anderen Ansichten — dann
+     stehen alle Reiter gleichzeitig untereinander auf der Seite. */
+  .view.active.split {
+    display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(270px, 1fr);
+    gap: 0 56px; align-items: start;
+  }
+  .col-side { margin-top: 0; }
+  .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chat { max-width: 70ch; }
+}
+
+@media (min-width: 1280px) {
+  header, .capture, nav.tabs, main { max-width: 1260px; }
+  .view.active.split { grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr);
+                       gap: 0 72px; }
 }

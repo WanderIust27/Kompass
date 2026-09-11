@@ -16,7 +16,7 @@ const KIND_LABEL = {
   aufgabe: "Aufgabe", idee: "Idee", notiz: "Notiz", kauf: "Kauf",
   person: "Person", empfehlung: "Empfehlung", routine: "Routine",
 };
-const TABS = ["today", "inbox", "hub", "more"];
+const TABS = ["today", "inbox", "unblock", "hub", "more"];
 const today = () => new Date().toISOString().slice(0, 10);
 
 async function api(path, opts = {}) {
@@ -184,7 +184,22 @@ LOADERS.today = async function () {
   loadBriefing(false);
   loadDecisions();
   renderCheckin();
+  loadNudge();
 };
+
+/* Der ungefragte Hinweis. Kompass rechnet ihn aus deinen Daten aus — nicht
+   das Modell, damit er sofort da ist und nicht bei jedem Laden anders klingt. */
+async function loadNudge() {
+  const box = $("#nudge");
+  try {
+    const { nudge } = await api("/unblock/nudge");
+    box.hidden = !nudge;
+    if (nudge) {
+      box.innerHTML = esc(nudge.text)
+        + `<button class="link" data-view="unblock">Einstieg holen ›</button>`;
+    }
+  } catch (e) { box.hidden = true; }
+}
 
 function renderDay(state) {
   const late = (t) => t.due_date && t.due_date < today();
@@ -346,6 +361,100 @@ $("#inboxHistoryBtn").addEventListener("click", () => {
     inboxStatus === "new" ? "Schon einsortiert" : "Offene zeigen";
   LOADERS.inbox();
 });
+
+/* ---------------------------------------------------------------- ANSCHUB */
+
+let timerHandle = null;
+
+LOADERS.unblock = async function () {
+  const data = await api("/unblock/history?limit=5");
+  const z = data.zahlen;
+  $("#unblockStats").innerHTML = z.gesamt
+    ? [`${plural(z.gesamt, "Einstieg", "Einstiege")} geholt`,
+       z.quote !== null ? `${z.quote} % davon haben gezogen` : null,
+       ...data.einträge.slice(0, 3).map((e) =>
+         `${e.step}${e.outcome ? ` — ${e.outcome}` : ""}`)]
+      .filter(Boolean).map((t) =>
+        `<div class="row"><div class="grow meta">${esc(t)}</div></div>`).join("")
+    : `<p class="empty">Noch nie gebraucht. Auch gut.</p>`;
+};
+
+$("#unblockGo").addEventListener("click", async () => {
+  $("#unblockResult").innerHTML = `<p class="empty">Anschub überlegt …</p>`;
+  const step = await guard(() => api("/unblock", {
+    method: "POST", body: { feeling: $("#unblockFeeling").value || null },
+  }));
+  renderStep(step);
+});
+
+function renderStep(step) {
+  clearInterval(timerHandle);
+  const allow = (step.ignorieren || []).length
+    ? `<div class="allow">Liegenbleiben darf: <b>${step.ignorieren.map(esc).join(", ")}</b></div>`
+    : "";
+  $("#unblockResult").innerHTML = `<div class="step">
+    <div class="what">${esc(step.schritt)}</div>
+    ${step.warum ? `<div class="why">${esc(step.warum)}</div>` : ""}
+    ${allow}
+    <div class="timer" id="timer">${pad(step.dauer_min)}:00</div>
+    <p class="foot">
+      <button class="btn accent" id="timerStart">${step.dauer_min} Minuten anfangen</button>
+      <button class="link" id="stepDone">geschafft</button>
+      <button class="link" id="stepOther">was anderes</button>
+      <button class="link" id="stepLater">jetzt nicht</button>
+    </p>
+    ${step.satz ? `<p class="quiet">${esc(step.satz)}</p>` : ""}
+    ${step.gerechnet ? `<p class="quiet">gerechnet, kein Modell</p>` : ""}
+  </div>`;
+
+  $("#timerStart").addEventListener("click", () => startTimer(step.dauer_min));
+  $("#stepDone").addEventListener("click", () => finish(step, "geschafft"));
+  $("#stepOther").addEventListener("click", async () => {
+    await finish(step, "anders", false);
+    $("#unblockGo").click();
+  });
+  $("#stepLater").addEventListener("click", () => finish(step, "nichts"));
+}
+
+const pad = (n) => String(n).padStart(2, "0");
+
+function startTimer(minutes) {
+  clearInterval(timerHandle);
+  let left = minutes * 60;
+  const el = $("#timer");
+  el.classList.remove("done");
+  timerHandle = setInterval(() => {
+    left -= 1;
+    el.textContent = `${pad(Math.floor(left / 60))}:${pad(left % 60)}`;
+    if (left <= 0) {
+      clearInterval(timerHandle);
+      el.classList.add("done");
+      el.textContent = "fertig";
+      toast("Zeit um. Weitermachen oder gut sein lassen — beides zählt.");
+    }
+  }, 1000);
+}
+
+/* "Geschafft" hakt auch die Sache selbst ab — sonst müsste man dafür wieder
+   in eine Liste wechseln, und genau das war ja das Problem. */
+async function finish(step, verdict, clear = true) {
+  clearInterval(timerHandle);
+  await guard(() => api(`/unblock/${step.id_log}/outcome`,
+    { method: "POST", body: { verdict } }));
+  if (verdict === "geschafft" && step.id) {
+    if (step.bezug === "task") {
+      await api(`/tasks/${step.id}/done`, { method: "POST" }).catch(() => {});
+    } else if (step.bezug === "routine") {
+      await api(`/routines/${step.id}/done`, { method: "POST", body: {} }).catch(() => {});
+    }
+    toast("Abgehakt. Das war der schwere Teil.");
+  }
+  if (clear) {
+    $("#unblockResult").innerHTML = "";
+    $("#unblockFeeling").value = "";
+    LOADERS.unblock();
+  }
+}
 
 /* -------------------------------------------------------------------- HUB */
 
@@ -880,6 +989,7 @@ const SETTING_FIELDS = {
   "#setBuyBig": "buy_threshold_big", "#setBuyBigH": "buy_wait_big_h",
   "#setBudget": "buy_budget_month", "#setUsage": "buy_usage_check_days",
   "#setMorning": "morning_hour", "#setEvening": "evening_hour",
+  "#setNudge": "nudge_hour", "#setUnblockModel": "unblock_model",
   "#setTone": "tone", "#setName": "user_name",
 };
 

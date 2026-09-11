@@ -15,12 +15,13 @@ kann.
 
 ## Was drin ist
 
-Vier Reiter, mehr nicht:
+Fünf Reiter, mehr nicht:
 
 | Reiter | Was dort steht |
 |---|---|
 | **Heute** | Zwei, drei Sätze Briefing und **eine** Liste: Aufgaben und Haushalt zusammen, klein zuerst. Darunter eine Zeile mit Anzahl und Zeit. Am Abend ein Regler für „wie war der Tag“ |
 | **Inbox** | Alles Reingeworfene. Kompass schlägt eine Schublade vor, ein Tippen bestätigt |
+| **Anschub** | Für den Moment, in dem gar nichts geht. Ein eigener Kopf, ein einziger Schritt, ein Timer — siehe unten |
 | **Alles** | Die Bereiche als schlichte Liste mit Zahlen dahinter: Aufgaben, Projekte, Haushalt, Käufe, Notizen, Empfehlungen, Menschen, Kompass fragen |
 | **Mehr** | Deine Zeit pro Wochentag, dahinter eingeklappt: Regeln, Ton, was er über dich gelernt hat, was er selbst umgestellt hat, Modell und Zustand |
 
@@ -37,6 +38,60 @@ erste Sache angefasst hat.
 Leeres wird gar nicht erst angezeigt: keine Überschrift über „nichts da“, keine
 Kachel, die den ganzen Tag ungenutzt herumsteht. Und der Abend-Check-in taucht
 am Abend auf, nicht morgens um acht.
+
+### Telefon und Laptop
+
+Dieselbe App, zwei Zuschnitte. Auf dem Telefon eine Spalte, in der Reihenfolge,
+in der man sie braucht. Ab Tabletbreite rückt alles Zweitrangige nach rechts
+statt unter den Inhalt — auf dem Laptop steht der ganze Tag ohne Scrollen da,
+Formulare und Filter daneben statt darunter.
+
+---
+
+## Wenn nichts geht: der Anschub
+
+Planen hilft nicht, wenn das Problem das Planen ist. Wenn alles gleich dringend
+aussieht und deshalb gar nichts passiert, ist noch eine Liste genau die falsche
+Antwort. Dafür gibt es einen **eigenen Kopf** — eine andere Stimme mit einer
+einzigen Aufgabe.
+
+**Er kommt von allein.** Kompass rechnet aus deinen Daten aus, wann du
+feststeckst, und schreibt dann genau *einen* Satz auf die Startseite:
+
+| Woran er es merkt | Was dann dasteht |
+|---|---|
+| Drei Tage nichts abgehakt, aber offene Sachen | „Das ist keine Faulheit, das ist Feststecken“ |
+| Nachmittags und heute noch nichts gelaufen | „Fangen wir klein an“ |
+| Drei Sachen dreimal verschoben | „Meistens ist eine davon der Stöpsel“ |
+| Fünf Haushaltssachen über drei Tage offen | „Das wächst nur weiter“ |
+| Acht Zurufe unsortiert | „Das im Kopf zu behalten kostet mehr Kraft“ |
+
+Höchstens einer davon, nie mehrere. Drei Hinweise gleichzeitig sind wieder eine
+Liste, und Listen sind das, woran es gerade scheitert.
+
+**Was der Anschub liefert**, wenn du ihn holst — auf Wunsch mit einem Satz von
+dir, was gerade los ist:
+
+* **einen** Handgriff, höchstens fünf Minuten, körperlich konkret. „Stell die
+  Tasse in die Spülmaschine“, nicht „Küche aufräumen“. Ausgewählt aus dem, was
+  wirklich offen ist — erfunden wird nichts.
+* einen Halbsatz, warum ausgerechnet der.
+* **was jetzt liegenbleiben darf.** Ausdrücklich, mit Anzahl. Die Erlaubnis ist
+  die halbe Arbeit.
+* einen Timer über genau diese Minuten. Läuft er ab, heißt es „weitermachen oder
+  gut sein lassen — beides zählt“.
+
+„Geschafft“ hakt die Sache gleich mit ab; du musst dafür nicht in eine Liste
+zurück. „Was anderes“ holt sofort einen neuen Schritt. Und weil jedes Mal
+mitgeschrieben wird, ob es gezogen hat, steht nach ein paar Wochen eine
+Trefferquote da — welcher Einstieg bei *dir* funktioniert.
+
+Der Anschub darf ein **eigenes Modell** benutzen (Mehr → Ton → *Eigenes Modell
+für den Anschub*). Leer heißt: dasselbe wie sonst. Es ist eine andere Art
+Antwort als ein Briefing, und manchmal will man dafür einen anderen Kopf.
+
+Ohne Modell bleibt er brauchbar: Dann nimmt er das Kleinste, was offen ist, und
+sagt dazu, dass es gerechnet war.
 
 ## Die vier Regeln
 
@@ -237,6 +292,9 @@ Alles in der `.env`:
 | `SEARXNG_URL` | leer | Eigene Suchinstanz statt DuckDuckGo |
 | `TMDB_API_KEY` | leer | Für Film- und Seriendaten |
 
+In der Oberfläche unter **Mehr → Ton** außerdem: ab welcher Uhrzeit der Anschub
+„heute ist noch nichts gelaufen“ anmerkt, und ob er ein eigenes Modell bekommt.
+
 In der Oberfläche unter **Mehr** zusätzlich: Zeitbudget pro Wochentag, Karenzzeit,
 Projektlimit, Kaufschwellen und -wartezeiten, Monatsbudget, Nutzungskontrolle,
 Briefing-Uhrzeiten, Tonfall, Modellwahl.
@@ -319,6 +377,7 @@ app/
     recommendations.py Empfehlungen
     planner.py         Tagesplan
     briefing.py        Morgen und Abend
+    unblock.py         der Anschub: Signale, ein Einstieg, Trefferquote
     profile.py         was er über dich gelernt hat (gerechnet, nicht geraten)
     chat.py            Gespräch
     websearch.py       DuckDuckGo/SearXNG, OpenLibrary, TMDB
@@ -342,7 +401,8 @@ sh tests/run_all.sh
 Drei Stück, keiner fasst echte Daten an:
 
 * **test_rules.py** — die Regeln, die weh tun, wenn sie falsch sind: Wartefristen,
-  Karenzzeit, Projektlimit, Haushaltsrhythmus, Tagesplan, Inbox ohne Modell.
+  Karenzzeit, Projektlimit, Haushaltsrhythmus, Tagesplan, Inbox ohne Modell und
+  der Anschub (meldet er sich beim richtigen Signal, nimmt er das Kleinste?).
 * **test_api.py** — jeder Endpunkt gegen eine Wegwerf-Datenbank, mit totem Ollama
   und ohne Internet. Kompass muss auch dann vollständig antworten.
 * **test_frontend.py** — Oberfläche und Skript passen zusammen: keine getippte

@@ -17,7 +17,7 @@ from ..db import all_settings, recent_events, set_setting
 from ..version import BUILT_AT, VERSION
 from ..services import (briefing, chat, notes, ollama_client, people, planner,
                         profile, projects, purchases, recommendations, routines,
-                        scheduler, tasks, triage, websearch)
+                        scheduler, tasks, triage, unblock, websearch)
 
 
 def auth(request: Request) -> None:
@@ -499,6 +499,29 @@ def chat_send(data: dict[str, Any] = Body(...)) -> dict[str, Any]:
 def chat_clear() -> dict[str, str]:
     chat.clear()
     return {"ok": "geleert"}
+
+
+# ------------------------------------------------------------------ Anschub
+
+@router.get("/unblock/nudge")
+def unblock_nudge() -> dict[str, Any]:
+    """Der ungefragte Satz für die Startseite — oder nichts."""
+    return {"nudge": unblock.nudge(), "signale": unblock.signals()}
+
+
+@router.get("/unblock/history")
+def unblock_history(limit: int = 20) -> dict[str, Any]:
+    return {"einträge": unblock.history(limit), "zahlen": unblock.stats()}
+
+
+@router.post("/unblock")
+def unblock_start(data: dict[str, Any] = Body(default={})) -> dict[str, Any]:
+    return unblock.rescue((data or {}).get("feeling"))
+
+
+@router.post("/unblock/{log_id}/outcome")
+def unblock_outcome(log_id: int, data: dict[str, Any] = Body(...)) -> dict[str, Any]:
+    return unblock.outcome(log_id, data.get("verdict") or "nichts")
 
 
 # ------------------------------------------------------------------- Muster

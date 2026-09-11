@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.db import get_db, init_db, set_setting, today_str      # noqa: E402
 from app.services import (notes, planner, projects, purchases,  # noqa: E402
-                          routines, tasks, triage)
+                          routines, tasks, triage, unblock)
 
 failures = []
 
@@ -165,6 +165,23 @@ treffer = notes.search("router")
 check("Volltextsuche findet die Notiz", len(treffer), 1)
 check("auch bei Wortanfang", len(notes.search("fahrrad")), 1)
 check("ohne Treffer bleibt es leer", len(notes.search("hubschrauber")), 0)
+
+# --- Anschub bei Blockade ------------------------------------------------
+print("\n— Anschub —")
+hinweis = unblock.nudge()
+check("bei null Erledigtem und offenen Sachen meldet er sich",
+      hinweis["grund"] if hinweis else None, "drei_tage")
+
+einstieg = unblock.rescue("alles zu viel gerade")
+check("ohne Modell nimmt er das Kleinste", einstieg["dauer_min"] <= 5, True)
+check("und bezieht sich auf etwas Echtes",
+      einstieg["bezug"] in ("task", "routine"), True)
+check("er sagt, was liegenbleiben darf", len(einstieg["ignorieren"]) > 0, True)
+check("und markiert sich als gerechnet", einstieg["gerechnet"], True)
+
+unblock.outcome(einstieg["id_log"], "geschafft")
+check("das Ergebnis wird festgehalten", unblock.stats()["geschafft"], 1)
+check("und ergibt eine Trefferquote", unblock.stats()["quote"], 100)
 
 print()
 if failures:

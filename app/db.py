@@ -232,6 +232,22 @@ CREATE TABLE IF NOT EXISTS events (
     text TEXT NOT NULL
 );
 
+-- Der Anschub: jedes Mal, wenn nichts mehr ging, und was daraus wurde.
+-- Daraus lernt Kompass, welcher Einstieg bei dir wirklich zieht.
+CREATE TABLE IF NOT EXISTS unblock_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    at TEXT NOT NULL DEFAULT (datetime('now')),
+    feeling TEXT,                            -- was du gesagt hast, wenn du etwas gesagt hast
+    signals_json TEXT,                       -- woran Kompass die Blockade gesehen hat
+    step TEXT NOT NULL,                      -- der eine Schritt
+    kind TEXT,                               -- task | routine | frei
+    ref_id INTEGER,
+    minutes INTEGER,
+    why TEXT,
+    ignore_json TEXT,                        -- was gerade ausdrücklich liegenbleiben darf
+    outcome TEXT                             -- geschafft | anders | nichts
+);
+
 CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -266,6 +282,9 @@ DEFAULT_SETTINGS: dict[str, str] = {
     "work_end": "17:30",
     # --- Ton und Darstellung -------------------------------------------
     "tone": "direkt",                # direkt | freundlich | trocken
+    # --- Anschub bei Blockade ------------------------------------------
+    "nudge_hour": "14",              # ab dieser Stunde fällt "heute nichts" auf
+    "unblock_model": "",             # eigenes Modell für den Anschub; leer = dasselbe
     "user_name": "",
     "ui_scale": "100",
     "ollama_model": "",              # leer = Wert aus der Umgebung

@@ -13,7 +13,7 @@
 <body>
 
 <header>
-  <div class="logo">Kompass</div>
+  <div class="logo">KOM<span class="needle">P</span>ASS</div>
   <button id="statusBadge" class="state" title="Zustand"></button>
 </header>
 
@@ -28,6 +28,7 @@
 <nav class="tabs">
   <button data-view="today" class="active">Heute</button>
   <button data-view="inbox">Inbox <span id="inboxDot" class="dot" hidden></span></button>
+  <button data-view="unblock">Anschub</button>
   <button data-view="hub">Alles</button>
   <button data-view="more">Mehr</button>
 </nav>
@@ -35,15 +36,20 @@
 <main>
 
 <!-- ================================================================ HEUTE -->
-<section id="view-today" class="view active">
-  <p id="briefing" class="briefing"></p>
-  <div id="dayList" class="list"></div>
-  <p id="dayFoot" class="foot"></p>
-  <div id="decisions" class="block" hidden></div>
-  <div id="checkinBox" class="block" hidden>
-    <p class="label">Wie war der Tag?</p>
-    <div class="scale" id="scaleMood"></div>
-    <input id="checkinNote" type="text" placeholder="Was hat gebremst?">
+<section id="view-today" class="view active split">
+  <div class="col-main">
+    <p id="briefing" class="briefing"></p>
+    <div id="nudge" class="nudge" hidden></div>
+    <div id="dayList" class="list"></div>
+    <p id="dayFoot" class="foot"></p>
+  </div>
+  <div class="col-side">
+    <div id="decisions" class="block" hidden></div>
+    <div id="checkinBox" class="block" hidden>
+      <p class="label">Wie war der Tag?</p>
+      <div class="scale" id="scaleMood"></div>
+      <input id="checkinNote" type="text" placeholder="Was hat gebremst?">
+    </div>
   </div>
 </section>
 
@@ -51,6 +57,26 @@
 <section id="view-inbox" class="view">
   <div id="inboxList" class="list"></div>
   <p class="foot"><button class="link" id="inboxHistoryBtn">Schon einsortiert</button></p>
+</section>
+
+<!-- ============================================================== ANSCHUB -->
+<!-- Ein eigener Kopf: nicht planen, sondern anfangen. -->
+<section id="view-unblock" class="view split">
+  <div class="col-main">
+    <p class="lead">Wenn alles gleich dringend aussieht und deshalb nichts
+      passiert, hilft keine Liste mehr. Hier kommt genau eine Sache — klein
+      genug, dass man sie nicht verhandeln kann.</p>
+    <input id="unblockFeeling" type="text"
+           placeholder="Was ist gerade los? (optional, ein Satz)">
+    <p class="foot"><button class="btn accent" id="unblockGo">Gib mir einen Einstieg</button></p>
+    <div id="unblockResult"></div>
+  </div>
+  <div class="col-side">
+    <div class="block">
+      <p class="label">Was das bringt</p>
+      <div id="unblockStats" class="list"></div>
+    </div>
+  </div>
 </section>
 
 <!-- ================================================================== HUB -->
@@ -68,138 +94,165 @@
 </section>
 
 <!-- ============================================================= AUFGABEN -->
-<section id="view-tasks" class="view sub">
-  <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Aufgaben</p>
-  <div id="taskList" class="list"></div>
-  <details class="adder">
-    <summary>Aufgabe anlegen</summary>
-    <input id="taskTitle" type="text" placeholder="Was ist zu tun?">
-    <div class="fields">
-      <input id="taskMin" type="number" min="1" placeholder="Minuten">
-      <input id="taskDue" type="date">
-      <select id="taskEnergy">
-        <option value="niedrig">wenig Energie</option>
-        <option value="mittel" selected>mittlere Energie</option>
-        <option value="hoch">volle Energie</option>
-      </select>
-      <select id="taskProject"><option value="">ohne Projekt</option></select>
-    </div>
-    <button class="btn" id="taskAdd">Anlegen</button>
-  </details>
-  <p class="foot">
-    <button class="link" id="taskFilterAll">alle zeigen</button> ·
-    <button class="link" id="taskFilterDone">erledigte</button>
-  </p>
+<section id="view-tasks" class="view sub split">
+  <div class="col-main">
+    <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Aufgaben</p>
+    <div id="taskList" class="list"></div>
+    <p class="foot">
+      <button class="link" id="taskFilterAll">alle zeigen</button> ·
+      <button class="link" id="taskFilterDone">erledigte</button>
+    </p>
+  </div>
+  <div class="col-side">
+    <details class="adder" open>
+      <summary>Aufgabe anlegen</summary>
+      <input id="taskTitle" type="text" placeholder="Was ist zu tun?">
+      <div class="fields">
+        <input id="taskMin" type="number" min="1" placeholder="Minuten">
+        <input id="taskDue" type="date">
+        <select id="taskEnergy">
+          <option value="niedrig">wenig Energie</option>
+          <option value="mittel" selected>mittlere Energie</option>
+          <option value="hoch">volle Energie</option>
+        </select>
+        <select id="taskProject"><option value="">ohne Projekt</option></select>
+      </div>
+      <button class="btn" id="taskAdd">Anlegen</button>
+    </details>
+  </div>
 </section>
 
 <!-- ============================================================= PROJEKTE -->
-<section id="view-projects" class="view sub">
-  <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Projekte
-    <span id="slotBadge" class="quiet"></span></p>
-  <div id="projectList" class="list"></div>
-  <details class="adder">
-    <summary>Projekt anlegen</summary>
-    <input id="projTitle" type="text" placeholder="Titel">
-    <input id="projNext" type="text" placeholder="Erster konkreter Schritt">
-    <button class="btn" id="projAdd">Starten</button>
-  </details>
-
-  <p class="label">Parkplatz<span id="cooldownHint" class="quiet"></span></p>
-  <div id="ideaList" class="list"></div>
+<section id="view-projects" class="view sub split">
+  <div class="col-main">
+    <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Projekte
+      <span id="slotBadge" class="quiet"></span></p>
+    <div id="projectList" class="list"></div>
+    <p class="label">Parkplatz<span id="cooldownHint" class="quiet"></span></p>
+    <div id="ideaList" class="list"></div>
+  </div>
+  <div class="col-side">
+    <details class="adder" open>
+      <summary>Projekt anlegen</summary>
+      <input id="projTitle" type="text" placeholder="Titel">
+      <input id="projNext" type="text" placeholder="Erster konkreter Schritt">
+      <button class="btn" id="projAdd">Starten</button>
+    </details>
+  </div>
 </section>
 
 <!-- ============================================================= HAUSHALT -->
-<section id="view-home" class="view sub">
-  <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Haushalt</p>
-  <div id="homeDue" class="list"></div>
-  <p class="foot"><button class="link" id="homeAllBtn">Alle Routinen</button></p>
-  <div id="homeAll" class="list" hidden></div>
-  <details class="adder">
-    <summary>Routine anlegen</summary>
-    <input id="routTitle" type="text" placeholder="Was?">
-    <div class="fields">
-      <input id="routRoom" type="text" placeholder="Raum">
-      <input id="routInterval" type="number" min="1" placeholder="alle … Tage">
-      <input id="routMin" type="number" min="1" placeholder="Minuten">
-    </div>
-    <button class="btn" id="routAdd">Anlegen</button>
-  </details>
+<section id="view-home" class="view sub split">
+  <div class="col-main">
+    <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Haushalt</p>
+    <div id="homeDue" class="list"></div>
+    <p class="foot"><button class="link" id="homeAllBtn">Alle Routinen</button></p>
+    <div id="homeAll" class="list" hidden></div>
+  </div>
+  <div class="col-side">
+    <details class="adder" open>
+      <summary>Routine anlegen</summary>
+      <input id="routTitle" type="text" placeholder="Was?">
+      <div class="fields">
+        <input id="routRoom" type="text" placeholder="Raum">
+        <input id="routInterval" type="number" min="1" placeholder="alle … Tage">
+        <input id="routMin" type="number" min="1" placeholder="Minuten">
+      </div>
+      <button class="btn" id="routAdd">Anlegen</button>
+    </details>
+  </div>
 </section>
 
 <!-- ================================================================ KÄUFE -->
-<section id="view-buy" class="view sub">
-  <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Käufe
-    <span id="budgetBadge" class="quiet"></span></p>
-  <div id="buyReady" class="list"></div>
-  <div id="buyWaiting" class="list"></div>
-  <details class="adder">
-    <summary>Wunsch eintragen</summary>
-    <input id="buyTitle" type="text" placeholder="Was willst du haben?">
-    <div class="fields">
-      <input id="buyPrice" type="number" step="0.01" placeholder="Euro">
-      <input id="buyUrl" type="text" placeholder="Link">
-    </div>
-    <input id="buyReason" type="text" placeholder="Warum?">
-    <button class="btn" id="buyAdd">Auf die Warteliste</button>
-    <p class="quiet" id="buyRuleHint"></p>
-  </details>
-  <p class="foot"><button class="link" id="buyHistoryBtn">Entschiedenes</button></p>
-  <div id="buyHistory" class="list"></div>
+<section id="view-buy" class="view sub split">
+  <div class="col-main">
+    <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Käufe
+      <span id="budgetBadge" class="quiet"></span></p>
+    <div id="buyReady" class="list"></div>
+    <div id="buyWaiting" class="list"></div>
+    <p class="foot"><button class="link" id="buyHistoryBtn">Entschiedenes</button></p>
+    <div id="buyHistory" class="list"></div>
+  </div>
+  <div class="col-side">
+    <details class="adder" open>
+      <summary>Wunsch eintragen</summary>
+      <input id="buyTitle" type="text" placeholder="Was willst du haben?">
+      <div class="fields">
+        <input id="buyPrice" type="number" step="0.01" placeholder="Euro">
+        <input id="buyUrl" type="text" placeholder="Link">
+      </div>
+      <input id="buyReason" type="text" placeholder="Warum?">
+      <button class="btn" id="buyAdd">Auf die Warteliste</button>
+      <p class="quiet" id="buyRuleHint"></p>
+    </details>
+  </div>
 </section>
 
 <!-- ============================================================== NOTIZEN -->
-<section id="view-notes" class="view sub">
-  <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Notizen</p>
-  <input id="noteSearch" type="search" placeholder="Suchen — Wort oder Sinn">
-  <div id="noteList" class="list"></div>
-  <details class="adder">
-    <summary>Notiz schreiben</summary>
-    <input id="noteTitle" type="text" placeholder="Titel (optional)">
-    <textarea id="noteBody" rows="4" placeholder="Text"></textarea>
-    <button class="btn" id="noteAdd">Speichern</button>
-  </details>
+<section id="view-notes" class="view sub split">
+  <div class="col-main">
+    <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Notizen</p>
+    <input id="noteSearch" type="search" placeholder="Suchen — Wort oder Sinn">
+    <div id="noteList" class="list"></div>
+  </div>
+  <div class="col-side">
+    <details class="adder" open>
+      <summary>Notiz schreiben</summary>
+      <input id="noteTitle" type="text" placeholder="Titel (optional)">
+      <textarea id="noteBody" rows="5" placeholder="Text"></textarea>
+      <button class="btn" id="noteAdd">Speichern</button>
+    </details>
+  </div>
 </section>
 
 <!-- ========================================================= EMPFEHLUNGEN -->
-<section id="view-recs" class="view sub">
-  <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Empfehlungen</p>
-  <div id="recList" class="list"></div>
-  <p class="foot">
-    <select id="recFilter">
-      <option value="queued">vorgemerkt</option>
-      <option value="doing">gerade dabei</option>
-      <option value="done">durch</option>
-      <option value="alle">alle</option>
-    </select>
-    <select id="recKind"></select>
-    <button class="link" id="recSuggest">Vorschläge holen</button>
-  </p>
-  <div id="recSuggestions" class="list"></div>
-  <details class="adder">
-    <summary>Von Hand eintragen</summary>
-    <input id="recTitle" type="text" placeholder="Titel">
+<section id="view-recs" class="view sub split">
+  <div class="col-main">
+    <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Empfehlungen</p>
+    <div id="recList" class="list"></div>
+    <div id="recSuggestions" class="list"></div>
+  </div>
+  <div class="col-side">
     <div class="fields">
-      <input id="recCreator" type="text" placeholder="Von wem">
-      <select id="recAddKind"></select>
+      <select id="recFilter">
+        <option value="queued">vorgemerkt</option>
+        <option value="doing">gerade dabei</option>
+        <option value="done">durch</option>
+        <option value="alle">alle</option>
+      </select>
+      <select id="recKind"></select>
     </div>
-    <button class="btn" id="recAdd">Merken</button>
-  </details>
+    <p class="foot"><button class="btn" id="recSuggest">Vorschläge holen</button></p>
+    <details class="adder" open>
+      <summary>Von Hand eintragen</summary>
+      <input id="recTitle" type="text" placeholder="Titel">
+      <div class="fields">
+        <input id="recCreator" type="text" placeholder="Von wem">
+        <select id="recAddKind"></select>
+      </div>
+      <button class="btn" id="recAdd">Merken</button>
+    </details>
+  </div>
 </section>
 
 <!-- ============================================================= MENSCHEN -->
-<section id="view-people" class="view sub">
-  <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Menschen</p>
-  <div id="peopleList" class="list"></div>
-  <details class="adder">
-    <summary>Person anlegen</summary>
-    <input id="perName" type="text" placeholder="Name">
-    <div class="fields">
-      <input id="perBirthday" type="date">
-      <input id="perCadence" type="number" min="1" placeholder="alle … Tage melden">
-    </div>
-    <input id="perNote" type="text" placeholder="Was du dir merken willst">
-    <button class="btn" id="perAdd">Anlegen</button>
-  </details>
+<section id="view-people" class="view sub split">
+  <div class="col-main">
+    <p class="crumb"><button class="link" data-view="hub">‹ Alles</button> Menschen</p>
+    <div id="peopleList" class="list"></div>
+  </div>
+  <div class="col-side">
+    <details class="adder" open>
+      <summary>Person anlegen</summary>
+      <input id="perName" type="text" placeholder="Name">
+      <div class="fields">
+        <input id="perBirthday" type="date">
+        <input id="perCadence" type="number" min="1" placeholder="alle … Tage melden">
+      </div>
+      <input id="perNote" type="text" placeholder="Was du dir merken willst">
+      <button class="btn" id="perAdd">Anlegen</button>
+    </details>
+  </div>
 </section>
 
 <!-- =============================================================== FRAGEN -->
@@ -214,61 +267,68 @@
 </section>
 
 <!-- ================================================================= MEHR -->
-<section id="view-more" class="view">
-  <p class="label">Deine Zeit</p>
-  <p class="quiet">Minuten, die du an einem Wochentag wirklich hast. Danach plant er.</p>
-  <div id="capacityGrid" class="cap-grid"></div>
+<section id="view-more" class="view split">
+  <div class="col-main">
+    <p class="label">Deine Zeit</p>
+    <p class="quiet">Minuten, die du an einem Wochentag wirklich hast. Danach plant er.</p>
+    <div id="capacityGrid" class="cap-grid"></div>
 
-  <details class="block">
-    <summary>Regeln</summary>
-    <div class="fields wide">
-      <label>Karenz für Ideen (Tage)<input id="setCooldown" type="number" min="0"></label>
-      <label>Projekte gleichzeitig<input id="setWip" type="number" min="1"></label>
-      <label>Warten ab … €<input id="setBuySmall" type="number" min="0"></label>
-      <label>… Stunden<input id="setBuySmallH" type="number" min="0"></label>
-      <label>Länger ab … €<input id="setBuyBig" type="number" min="0"></label>
-      <label>… Stunden<input id="setBuyBigH" type="number" min="0"></label>
-      <label>Monatsbudget (€)<input id="setBudget" type="number" min="0"></label>
-      <label>Nutzung prüfen nach (Tagen)<input id="setUsage" type="number" min="1"></label>
-      <label>Briefing morgens (Uhr)<input id="setMorning" type="number" min="0" max="23"></label>
-      <label>Check-in abends (Uhr)<input id="setEvening" type="number" min="0" max="23"></label>
-    </div>
-  </details>
+    <details class="block">
+      <summary>Regeln</summary>
+      <div class="fields wide">
+        <label>Karenz für Ideen (Tage)<input id="setCooldown" type="number" min="0"></label>
+        <label>Projekte gleichzeitig<input id="setWip" type="number" min="1"></label>
+        <label>Warten ab … €<input id="setBuySmall" type="number" min="0"></label>
+        <label>… Stunden<input id="setBuySmallH" type="number" min="0"></label>
+        <label>Länger ab … €<input id="setBuyBig" type="number" min="0"></label>
+        <label>… Stunden<input id="setBuyBigH" type="number" min="0"></label>
+        <label>Monatsbudget (€)<input id="setBudget" type="number" min="0"></label>
+        <label>Nutzung prüfen nach (Tagen)<input id="setUsage" type="number" min="1"></label>
+        <label>Briefing morgens (Uhr)<input id="setMorning" type="number" min="0" max="23"></label>
+        <label>Check-in abends (Uhr)<input id="setEvening" type="number" min="0" max="23"></label>
+        <label>Anschub meldet sich ab (Uhr)<input id="setNudge" type="number" min="0" max="23"></label>
+      </div>
+    </details>
 
-  <details class="block">
-    <summary>Ton</summary>
-    <div class="fields wide">
-      <label>Wie er mit dir redet
-        <select id="setTone">
-          <option value="direkt">direkt</option>
-          <option value="freundlich">freundlich</option>
-          <option value="trocken">trocken</option>
-        </select>
-      </label>
-      <label>Dein Name<input id="setName" type="text" placeholder="optional"></label>
-    </div>
-  </details>
+    <details class="block">
+      <summary>Ton</summary>
+      <div class="fields wide">
+        <label>Wie er mit dir redet
+          <select id="setTone">
+            <option value="direkt">direkt</option>
+            <option value="freundlich">freundlich</option>
+            <option value="trocken">trocken</option>
+          </select>
+        </label>
+        <label>Dein Name<input id="setName" type="text" placeholder="optional"></label>
+        <label>Eigenes Modell für den Anschub
+          <input id="setUnblockModel" type="text" placeholder="leer = dasselbe"></label>
+      </div>
+    </details>
 
-  <p class="foot"><button class="btn" id="saveSettings">Speichern</button>
-    <span id="settingsSaved" class="quiet"></span></p>
+    <p class="foot"><button class="btn" id="saveSettings">Speichern</button>
+      <span id="settingsSaved" class="quiet"></span></p>
+  </div>
 
-  <details class="block">
-    <summary>Was er über dich weiß</summary>
-    <div id="profileList" class="list"></div>
-    <button class="link" id="profileRefresh">neu rechnen</button>
-  </details>
+  <div class="col-side">
+    <details class="block">
+      <summary>Was er über dich weiß</summary>
+      <div id="profileList" class="list"></div>
+      <button class="link" id="profileRefresh">neu rechnen</button>
+    </details>
 
-  <details class="block">
-    <summary>Was er selbst umgestellt hat</summary>
-    <div id="eventList" class="list"></div>
-  </details>
+    <details class="block">
+      <summary>Was er selbst umgestellt hat</summary>
+      <div id="eventList" class="list"></div>
+    </details>
 
-  <details class="block">
-    <summary>Modell und Zustand</summary>
-    <div id="modelList" class="list"></div>
-    <p class="quiet" id="modelHint"></p>
-    <div id="statusBlock" class="list"></div>
-  </details>
+    <details class="block">
+      <summary>Modell und Zustand</summary>
+      <div id="modelList" class="list"></div>
+      <p class="quiet" id="modelHint"></p>
+      <div id="statusBlock" class="list"></div>
+    </details>
+  </div>
 </section>
 
 </main>

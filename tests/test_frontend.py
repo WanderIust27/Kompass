@@ -27,7 +27,8 @@ def check(name, actual, expected):
 html_ids = set(re.findall(r'id="([^"]+)"', html))
 js_ids = set(re.findall(r'\$\("#([A-Za-z][\w-]*)"\)', js))
 # Zur Laufzeit erzeugte Elemente muessen nicht im HTML stehen.
-runtime_ids = {"pending", "briefAgain", "replanBtn"}
+runtime_ids = {"pending", "briefAgain", "replanBtn", "timer",
+               "timerStart", "stepDone", "stepOther", "stepLater"}
 
 missing = sorted(js_ids - html_ids - runtime_ids)
 check("jede vom Skript gesuchte ID gibt es im HTML", missing, [])
@@ -44,7 +45,8 @@ check("jeder Reiter hat eine Ladefunktion", sorted(views - loaders), [])
 for klass in ["row", "check", "btn", "link", "take", "msg", "empty", "toast",
               "list", "meta", "grow", "acts", "hub", "crumb", "label", "quiet",
               "foot", "block", "when", "gone", "briefing", "scale", "cap-grid",
-              "adder", "fields", "chat", "state", "dot", "capture"]:
+              "adder", "fields", "chat", "state", "dot", "capture", "needle",
+              "split", "col-main", "col-side", "nudge", "lead", "step", "timer"]:
     if f".{klass}" not in css:
         failures.append(f"Klasse .{klass} fehlt im Stylesheet")
         print(f"FAIL Klasse .{klass} wird benutzt, ist aber nicht gestaltet")
