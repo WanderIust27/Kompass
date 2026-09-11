@@ -2,7 +2,7 @@
 
 Zwei Quellen: das lokale Modell, das deine Liste und deine Bewertungen
 kennt, und — wenn Internet erlaubt ist — OpenLibrary beziehungsweise TMDB
-fuer die harten Daten. Ohne Netz bleibt es beim Modellwissen, dann steht
+für die harten Daten. Ohne Netz bleibt es beim Modellwissen, dann steht
 das auch so dabei; erfundene Titel als echte Funde auszugeben wäre der
 schlechteste Dienst.
 """
@@ -162,7 +162,7 @@ def _verify(title: str, kind: str) -> dict[str, Any]:
 
 
 def lookup(title: str, kind: str = "book") -> list[dict[str, Any]]:
-    """Direkte Suche in den externen Quellen — fuer das Eintragen von Hand."""
+    """Direkte Suche in den externen Quellen — für das Eintragen von Hand."""
     if kind == "book":
         return websearch.openlibrary(title)
     if kind in ("movie", "series"):

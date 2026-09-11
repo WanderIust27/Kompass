@@ -20,7 +20,7 @@ log = logging.getLogger("kompass.kauf")
 
 QUESTIONS = [
     ("problem", "Welches Problem löst es — heute, nicht theoretisch?"),
-    ("current", "Was benutzt du dafuer gerade, und warum reicht das nicht?"),
+    ("current", "Was benutzt du dafür gerade, und warum reicht das nicht?"),
     ("without", "Was passiert, wenn du es nicht kaufst?"),
     ("future", "Wo steht das Ding in drei Monaten?"),
 ]
@@ -144,8 +144,8 @@ def _ai_take(item: dict[str, Any], answers: dict[str, str]) -> str | None:
         + (f"\n\nBudget diesen Monat: {budget['spent']:.0f} von "
            f"{budget['budget']:.0f} Euro schon ausgegeben."
            if budget.get("budget") else "")
-        + "\n\nSchreib drei bis fuenf Sätze: Wo die Antworten tragen und wo sie "
-          "dünn sind, und was du an seiner Stelle tätest. Keine Ueberschriften, "
+        + "\n\nSchreib drei bis fünf Sätze: Wo die Antworten tragen und wo sie "
+          "dünn sind, und was du an seiner Stelle tätest. Keine Überschriften, "
           "keine Aufzählung, kein Vorwort.")
     try:
         return generate(prompt, system=_SYSTEM, temperature=0.5)
@@ -202,7 +202,7 @@ def research(purchase_id: int) -> dict[str, Any]:
 
 
 def decide(purchase_id: int, verdict: str, price: float | None = None) -> dict[str, Any]:
-    """gekauft | verworfen — beides zählt fuer deine Trefferquote."""
+    """gekauft | verworfen — beides zählt für deine Trefferquote."""
     item = get(purchase_id)
     now = today_str()
     if verdict == "gekauft":

@@ -60,7 +60,7 @@ def plan(day: str | None = None) -> dict[str, Any]:
     used += sum(int(t["est_min"] or 0) for t in picked)
 
     if moved:
-        log_event("plan", f"Tagesplan fuer {day} neu gelegt.")
+        log_event("plan", f"Tagesplan für {day} neu gelegt.")
     return {
         "day": day,
         "capacity_min": budget,
@@ -92,7 +92,7 @@ def _pick_tasks(day: str, budget: int) -> tuple[list[dict[str, Any]], list[dict[
         if due == day:
             return 1                                    # heute fällig
         if task.get("planned_day") == day:
-            return 2                                    # war schon fuer heute geplant
+            return 2                                    # war schon für heute geplant
         if task.get("project_id"):
             return 3                                    # bringt ein Projekt voran
         return 4                                        # der Rest

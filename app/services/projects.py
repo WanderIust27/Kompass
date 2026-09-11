@@ -20,7 +20,7 @@ from ..db import (day_plus, get_db, get_int, log_event, parse_day,
 RITUAL_QUESTIONS = [
     ("outcome", "Woran merkst du, dass es fertig ist?"),
     ("hours", "Wie viele Stunden kostet das realistisch — mal zwei gerechnet?"),
-    ("instead", "Was bleibt dafuer liegen?"),
+    ("instead", "Was bleibt dafür liegen?"),
     ("why_now", "Warum jetzt und nicht in drei Monaten?"),
 ]
 
@@ -164,7 +164,7 @@ def add_project(title: str, why: str | None = None, deadline: str | None = None,
                 "WHERE id=?", (project_id, today_str(), from_idea_id))
     if override_reason:
         log_event("projekte",
-                  f"WIP-Limit gebrochen fuer „{title}“ — Begründung: {override_reason}")
+                  f"WIP-Limit gebrochen für „{title}“ — Begründung: {override_reason}")
     else:
         log_event("projekte", f"Projekt „{title}“ gestartet.")
     return get_project(project_id)
@@ -233,7 +233,7 @@ def delete_project(project_id: int) -> None:
 
 
 def stale(days: int = 14) -> list[dict[str, Any]]:
-    """Projekte, an denen lange nichts passiert ist — Stoff fuer den Wochenrückblick."""
+    """Projekte, an denen lange nichts passiert ist — Stoff für den Wochenrückblick."""
     return [p for p in projects("active")
             if p.get("stale_days") is not None and p["stale_days"] >= days]
 
@@ -268,9 +268,9 @@ def review(idea_id: int, answers: dict[str, str]) -> dict[str, Any]:
         f"Sie liegt seit {idea['created_at'][:10]} auf dem Parkplatz.\n"
         f"Laufende Projekte ({state['used']} von {state['limit']}): {running}\n\n"
         + "\n".join(lines)
-        + "\n\nSag in drei bis fuenf Sätzen, was du davon hältst: Ist das ein "
+        + "\n\nSag in drei bis fünf Sätzen, was du davon hältst: Ist das ein "
           "Projekt oder ein Impuls? Passt es neben das, was schon läuft? Wenn "
-          "kein Platz frei ist, sag klar, was dafuer weichen müsste. Keine "
+          "kein Platz frei ist, sag klar, was dafür weichen müsste. Keine "
           "Aufzählung, kein Vorwort.")
     system = (
         "Du bist Kompass, der Assistent eines Menschen mit ADHS. Bei neuen Ideen "

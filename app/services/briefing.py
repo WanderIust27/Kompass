@@ -42,14 +42,14 @@ def system_prompt() -> str:
         "Du bist Kompass, der persönliche Assistent eines Menschen mit ADHS." + who +
         " Du kennst seinen Alltag aus den Daten, die dir gegeben werden, und "
         "erfindest nichts dazu. " + tone +
-        " Du duzt. Du schreibst Deutsch, in ganzen Sätzen, ohne Ueberschriften, "
+        " Du duzt. Du schreibst Deutsch, in ganzen Sätzen, ohne Überschriften, "
         "ohne Aufzählungszeichen, ohne Emojis und ohne Vorwort wie 'Hier ist'. "
         "Du weißt, dass zu viele Punkte auf einmal lahmlegen: Du nennst höchstens "
         "drei Dinge und sagst, womit angefangen wird.")
 
 
 def context(day: str | None = None) -> dict[str, Any]:
-    """Alles, was fuer heute zählt — einmal eingesammelt."""
+    """Alles, was für heute zählt — einmal eingesammelt."""
     day = day or today_str()
     state = planner.today(day)
     ideas_ripe = [i for i in projects.ideas("ripe")]
@@ -151,12 +151,13 @@ def morning(day: str | None = None, force: bool = False) -> dict[str, Any]:
     planner.plan(day)
     ctx = context(day)
     prompt = (_digest(ctx) + "\n\n"
-              "Schreib das Morgenbriefing: vier bis sechs Sätze. Fang mit dem "
-              "einen Ding an, mit dem er heute anfangen soll, und sag warum "
-              "ausgerechnet damit. Nenn danach höchstens zwei weitere Punkte. "
-              "Wenn der Plan zu voll ist, sag es und schlag vor, was wegfällt.")
-    text = _ask(prompt) or _fallback_morning(ctx)
-    return _store(day, "morning", text)
+              "Schreib das Morgenbriefing: höchstens drei Sätze. Der erste sagt, "
+              "womit er anfangen soll und warum ausgerechnet damit. Die anderen "
+              "beiden nur, wenn sie wirklich nötig sind — etwa weil der Plan zu "
+              "voll ist oder etwas entschieden werden muss. Lieber zwei Sätze "
+              "als drei.")
+    text = _ask(prompt)
+    return _store(day, "morning", text or _fallback_morning(ctx), computed=not text)
 
 
 def evening(day: str | None = None, force: bool = False) -> dict[str, Any]:
@@ -167,14 +168,14 @@ def evening(day: str | None = None, force: bool = False) -> dict[str, Any]:
     ctx = context(day)
     done = ctx["plan"]["done"]
     prompt = (_digest(ctx) + "\n"
-              + f"Heute erledigt: {len(done)} Aufgabe(n)"
+              + f"Heute erledigt: {_n(len(done), 'Sache', 'Sachen')}"
               + (": " + "; ".join(t["title"] for t in done[:6]) if done else "")
-              + "\n\nSchreib den Abend-Check-in: drei bis fuenf Sätze. Erst was "
+              + "\n\nSchreib den Abend-Check-in: höchstens drei Sätze. Erst was "
                 "heute lief — ehrlich, ohne Lob auf Vorrat. Dann, was auf morgen "
                 "rutscht. Schließ mit genau einer Frage, die er in einem Satz "
                 "beantworten kann.")
-    text = _ask(prompt) or _fallback_evening(ctx)
-    return _store(day, "evening", text)
+    text = _ask(prompt)
+    return _store(day, "evening", text or _fallback_evening(ctx), computed=not text)
 
 
 def _ask(prompt: str) -> str | None:
@@ -200,20 +201,22 @@ def _fallback_morning(ctx: dict[str, Any]) -> str:
     if ctx["ideen_reif"]:
         parts.append(f"{len(ctx['ideen_reif'])} Idee(n) warten auf eine Entscheidung.")
     if ctx["kaeufe_entscheiden"]:
-        parts.append(f"{len(ctx['kaeufe_entscheiden'])} Kauf/Käufe haben die "
-                     f"Wartefrist hinter sich.")
-    parts.append("(Das Modell war gerade nicht erreichbar — das hier ist gerechnet, "
-                 "nicht geschrieben.)")
+        parts.append(f"{_n(len(ctx['kaeufe_entscheiden']), 'Kauf', 'Käufe')} "
+                     f"hinter der Wartefrist.")
     return " ".join(parts)
 
 
 def _fallback_evening(ctx: dict[str, Any]) -> str:
     done = len(ctx["plan"]["done"])
     open_left = len(ctx["plan"]["tasks"])
-    return (f"Heute sind {done} Aufgabe(n) fertig geworden, {open_left} stehen noch "
-            f"offen und rutschen auf morgen. Haushalt: {ctx['haushalt']['fällig']} "
-            f"Punkt(e) fällig. Was hat heute am meisten gebremst? "
-            f"(Das Modell war nicht erreichbar — das hier ist gerechnet.)")
+    return (f"Heute {_n(done, 'Sache', 'Sachen')} fertig, "
+            f"{_n(open_left, 'Sache rutscht', 'Sachen rutschen')} auf morgen. "
+            f"Was hat am meisten gebremst?")
+
+
+def _n(count: int, one: str, many: str) -> str:
+    """Ein-Elementes ohne Klammerplural — \"1 Aufgabe(n)\" liest sich wie ein Formular."""
+    return f"{count} {one if count == 1 else many}"
 
 
 def _stored(day: str, slot: str) -> dict[str, Any] | None:
@@ -223,13 +226,15 @@ def _stored(day: str, slot: str) -> dict[str, Any] | None:
     return dict(row) if row else None
 
 
-def _store(day: str, slot: str, text: str) -> dict[str, Any]:
+def _store(day: str, slot: str, text: str, computed: bool = False) -> dict[str, Any]:
     with get_db() as db:
         db.execute(
-            """INSERT INTO briefings(day, slot, text) VALUES(?,?,?)
+            """INSERT INTO briefings(day, slot, text, computed) VALUES(?,?,?,?)
                ON CONFLICT(day, slot) DO UPDATE SET text=excluded.text,
-                 created_at=datetime('now')""", (day, slot, text))
-    return _stored(day, slot) or {"day": day, "slot": slot, "text": text}
+                 computed=excluded.computed, created_at=datetime('now')""",
+            (day, slot, text, int(computed)))
+    return _stored(day, slot) or {"day": day, "slot": slot, "text": text,
+                                  "computed": int(computed)}
 
 
 def recent(limit: int = 10) -> list[dict[str, Any]]:

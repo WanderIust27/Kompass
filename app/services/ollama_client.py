@@ -1,7 +1,7 @@
-"""Dünner Client fuer die lokale Ollama-Instanz.
+"""Dünner Client für die lokale Ollama-Instanz.
 
 Kompass teilt sich das Ollama mit PULS. Das heißt auch: das Modell kann
-gerade fuer die andere App im Speicher liegen und ein paar Sekunden brauchen,
+gerade für die andere App im Speicher liegen und ein paar Sekunden brauchen,
 bis es antwortet. Deshalb sind die Zeitlimits großzügig.
 """
 from __future__ import annotations
@@ -18,25 +18,25 @@ from ..db import get_setting
 
 log = logging.getLogger("kompass.ollama")
 
-# Auswahl fuer die Oberfläche. Größen sind Richtwerte fuer Q4; die
-# Einschätzung zur Geschwindigkeit gilt fuer eine 8-GB-Karte.
+# Auswahl für die Oberfläche. Größen sind Richtwerte für Q4; die
+# Einschätzung zur Geschwindigkeit gilt für eine 8-GB-Karte.
 MODEL_PRESETS = [
     {"name": "qwen3:8b", "label": "Qwen 3 · 8B", "size_gb": 4.7,
      "speed": "flüssig",
      "note": "Empfohlen und dasselbe Modell, das PULS benutzt — dann liegt nur "
              "eines auf der Karte. Bestes Deutsch in dieser Größe, argumentiert "
-             "ordentlich genug fuer Kaufberatung und Ideenbewertung."},
+             "ordentlich genug für Kaufberatung und Ideenbewertung."},
     {"name": "qwen3:4b", "label": "Qwen 3 · 4B", "size_gb": 2.8,
      "speed": "schnell",
      "note": "Etwa doppelt so schnell. Merklich schlichter, wenn er abwägen "
-             "soll — fuer Einsortieren und kurze Rückmeldungen aber genug."},
+             "soll — für Einsortieren und kurze Rückmeldungen aber genug."},
     {"name": "gemma3:4b", "label": "Gemma 3 · 4B", "size_gb": 2.6,
      "speed": "schnell",
-     "note": "Formuliert oft natürlicher als Qwen, denkt dafuer weniger "
-             "strukturiert. Angenehm fuer Briefings."},
+     "note": "Formuliert oft natürlicher als Qwen, denkt dafür weniger "
+             "strukturiert. Angenehm für Briefings."},
     {"name": "llama3.2:3b", "label": "Llama 3.2 · 3B", "size_gb": 2.0,
      "speed": "sehr schnell",
-     "note": "Der Sparsame. Lässt noch Platz fuer ein zweites Modell auf der "
+     "note": "Der Sparsame. Lässt noch Platz für ein zweites Modell auf der "
              "Karte, bei längeren Begründungen merkt man die Größe."},
 ]
 
@@ -143,7 +143,7 @@ def generate(prompt: str, system: str | None = None, json_mode: bool = False,
 
 def chat(messages: list[dict[str, str]], system: str | None = None,
          temperature: float = 0.6, num_ctx: int = 8192) -> str:
-    """Mehrzügiges Gespräch — fuer den Chat-Reiter."""
+    """Mehrzügiges Gespräch — für den Chat-Reiter."""
     msgs = ([{"role": "system", "content": system}] if system else []) + messages
     payload = {"model": active_model(), "messages": msgs, "stream": False,
                "options": {"temperature": temperature, "num_ctx": num_ctx}}
@@ -188,7 +188,7 @@ def embed_model() -> str:
 
 
 def embed(texts: Sequence[str]) -> list[list[float]]:
-    """Texte in Vektoren verwandeln — fuer die semantische Notizsuche.
+    """Texte in Vektoren verwandeln — für die semantische Notizsuche.
 
     Neuere Ollama-Versionen können /api/embed mit mehreren Texten auf einmal,
     ältere nur /api/embeddings mit einem. Beides wird bedient.

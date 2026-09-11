@@ -6,29 +6,37 @@ Ideen und Käufen und redet mit dir über eine KI, die **auf deinem eigenen
 Server** läuft. Keine Cloud, kein Abo, keine Konten.
 
 Gebaut für einen Kopf mit ADHS. Das ist keine Marketingzeile, sondern die
-Bauanleitung: Es gibt **ein** Eingabefeld statt zehn Formulare, der Tag zeigt
-**drei** Dinge statt vierzig, und die Regeln greifen von allein, weil man sich
-im richtigen Moment nicht auf seine Selbstdisziplin verlassen kann.
+Bauanleitung: **ein** Eingabefeld statt zehn Formulare, **eine** Liste für den
+Tag statt sechs Kacheln, Aktionen erst auf Antippen — und Regeln, die von allein
+greifen, weil man sich im richtigen Moment nicht auf Selbstdisziplin verlassen
+kann.
 
 ---
 
 ## Was drin ist
 
-| Reiter | Was dort passiert |
-|---|---|
-| **Heute** | Briefing, Tagesplan mit Zeitbudget, fälliger Haushalt, Abend-Check-in, Protokoll dessen, was Kompass selbst umgestellt hat |
-| **Inbox** | Alles Reingeworfene. Kompass schlägt die Schublade vor, du bestätigst mit einem Tippen |
-| **Aufgaben** | Offenes mit Dauer, Energie, Ort und Fälligkeit — filterbar nach Tagesform |
-| **Projekte** | Laufende Projekte mit Platzlimit, dazu der Ideen-Parkplatz mit Karenzzeit und Bewertungsritual |
-| **Haushalt** | Routinen, deren Rhythmus ab der letzten Erledigung zählt und sich selbst korrigiert |
-| **Käufe** | Warteliste nach Preis, vier unbequeme Fragen, Recherche im Netz, Budget, spätere Nutzungskontrolle |
-| **Notizen** | Volltext **und** semantische Suche — findet auch, was du anders formuliert hast |
-| **Empfehlungen** | Bücher, Filme, Serien, Podcasts, Spiele: Liste, Bewertung, neue Vorschläge nach deinem Geschmack |
-| **Menschen** | Wer dran wäre, Geburtstage, was du dir über jemanden gemerkt hast |
-| **Fragen** | Chat mit Kompass — er kennt deinen Stand, kann aber nichts eintragen |
-| **Mehr** | Deine Zeit pro Wochentag, alle Regeln, Ton, Modellwahl, was er über dich gelernt hat |
+Vier Reiter, mehr nicht:
 
----
+| Reiter | Was dort steht |
+|---|---|
+| **Heute** | Zwei, drei Sätze Briefing und **eine** Liste: Aufgaben und Haushalt zusammen, klein zuerst. Darunter eine Zeile mit Anzahl und Zeit. Am Abend ein Regler für „wie war der Tag“ |
+| **Inbox** | Alles Reingeworfene. Kompass schlägt eine Schublade vor, ein Tippen bestätigt |
+| **Alles** | Die Bereiche als schlichte Liste mit Zahlen dahinter: Aufgaben, Projekte, Haushalt, Käufe, Notizen, Empfehlungen, Menschen, Kompass fragen |
+| **Mehr** | Deine Zeit pro Wochentag, dahinter eingeklappt: Regeln, Ton, was er über dich gelernt hat, was er selbst umgestellt hat, Modell und Zustand |
+
+Über allem ein Feld für alles. Der teuerste Moment beim Aufschreiben ist die
+Frage „wohin damit“ — also gibt es sie nicht.
+
+### Warum so wenig auf einmal
+
+Jede Zeile ist ein Kreis, ein Titel und eine Zeitangabe. Sonst nichts. Die
+Aktionen — morgen, in drei Tagen, löschen — erscheinen erst, wenn man die Zeile
+antippt. Zwölf Knöpfe auf einem Schirm sind zwölf Entscheidungen, bevor man die
+erste Sache angefasst hat.
+
+Leeres wird gar nicht erst angezeigt: keine Überschrift über „nichts da“, keine
+Kachel, die den ganzen Tag ungenutzt herumsteht. Und der Abend-Check-in taucht
+am Abend auf, nicht morgens um acht.
 
 ## Die vier Regeln
 

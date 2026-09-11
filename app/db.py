@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS notes (
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(title, body);
--- Vektoren fuer die semantische Suche: float32, auf Länge 1 normiert,
+-- Vektoren für die semantische Suche: float32, auf Länge 1 normiert,
 -- damit das Skalarprodukt direkt die Aehnlichkeit ist.
 CREATE TABLE IF NOT EXISTS note_vectors (
     note_id INTEGER PRIMARY KEY REFERENCES notes(id) ON DELETE CASCADE,
@@ -191,6 +191,7 @@ CREATE TABLE IF NOT EXISTS briefings (
     day TEXT NOT NULL,
     slot TEXT NOT NULL,                      -- morning | evening
     text TEXT NOT NULL,
+    computed INTEGER NOT NULL DEFAULT 0,     -- 1 = gerechnet, weil kein Modell da war
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE(day, slot)
 );
@@ -257,7 +258,7 @@ DEFAULT_SETTINGS: dict[str, str] = {
     # --- Tagesrhythmus -------------------------------------------------
     "morning_hour": "7",
     "evening_hour": "21",
-    # Wie viele Minuten du an einem Wochentag realistisch fuer Aufgaben und
+    # Wie viele Minuten du an einem Wochentag realistisch für Aufgaben und
     # Haushalt hast. Wird in den Einstellungen gesetzt.
     "capacity_json": json.dumps({"Mo": 60, "Di": 60, "Mi": 60, "Do": 60,
                                  "Fr": 60, "Sa": 120, "So": 90}),
@@ -272,7 +273,7 @@ DEFAULT_SETTINGS: dict[str, str] = {
 }
 
 # Startplan Haushalt. Bewusst kleinteilig: "Bad putzen" ist eine Stunde und
-# wird verschoben, "Waschbecken und Spiegel" sind fuenf Minuten und werden
+# wird verschoben, "Waschbecken und Spiegel" sind fünf Minuten und werden
 # gemacht. Alles hier ist in der App änderbar und löschbar.
 SEED_ROUTINES: list[tuple[str, str, float, int, str]] = [
     # (Titel, Raum, Intervall in Tagen, Dauer, Energie)
@@ -299,14 +300,35 @@ SEED_ROUTINES: list[tuple[str, str, float, int, str]] = [
 ]
 
 
+# Spalten, die zu einer bestehenden Datenbank hinzukommen können. CREATE TABLE
+# IF NOT EXISTS ergänzt keine Spalten — das muss ALTER TABLE tun. Die Liste darf
+# wachsen; jeder Eintrag wird nur angelegt, wenn er noch fehlt.
+COLUMN_MIGRATIONS: list[tuple[str, str, str]] = [
+    ("briefings", "computed", "INTEGER NOT NULL DEFAULT 0"),
+]
+
+
 def init_db() -> None:
     ensure_dirs()
     with get_db() as db:
         db.executescript(SCHEMA)
+        _migrate(db)
         for key, value in DEFAULT_SETTINGS.items():
             db.execute("INSERT OR IGNORE INTO settings(key, value) VALUES(?,?)",
                        (key, value))
         _seed_routines(db)
+
+
+def _migrate(db: sqlite3.Connection) -> None:
+    """Fehlende Spalten nachrüsten, ohne bestehende Daten anzufassen."""
+    tables = {r["name"] for r in db.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+    for table, column, coltype in COLUMN_MIGRATIONS:
+        if table not in tables:
+            continue
+        cols = {r["name"] for r in db.execute(f"PRAGMA table_info({table})").fetchall()}
+        if column not in cols:
+            db.execute(f"ALTER TABLE {table} ADD COLUMN {column} {coltype}")
 
 
 def _seed_routines(db: sqlite3.Connection) -> None:
@@ -392,7 +414,7 @@ def all_settings() -> dict[str, str]:
 
 
 def log_event(kind: str, text: str) -> None:
-    """Was Kompass selbst getan hat — fuer die Zeile 'was ich verändert habe'."""
+    """Was Kompass selbst getan hat — für die Zeile 'was ich verändert habe'."""
     with get_db() as db:
         db.execute("INSERT INTO events(kind, text) VALUES(?,?)", (kind, text))
 

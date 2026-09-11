@@ -1,4 +1,4 @@
-"""Die Inbox — ein Feld fuer alles.
+"""Die Inbox — ein Feld für alles.
 
 Der teuerste Moment beim Aufschreiben ist die Frage "wohin damit". Deshalb
 gibt es genau ein Eingabefeld, und das Einsortieren passiert danach: das

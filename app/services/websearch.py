@@ -1,4 +1,4 @@
-"""Netzzugriff fuer Kaufrecherche und Buch-/Filmdaten.
+"""Netzzugriff für Kaufrecherche und Buch-/Filmdaten.
 
 Bewusst eng gehalten: Es geht nur ein Suchbegriff hinaus, nie Notizen,
 Aufgaben oder sonst etwas aus deiner Datenbank. Mit ALLOW_WEB=0 ist hier

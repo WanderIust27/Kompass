@@ -97,7 +97,7 @@ def query(active_only: bool = True, room: str | None = None) -> list[dict[str, A
 
 
 def due(day: str | None = None) -> list[dict[str, Any]]:
-    """Was heute (oder frueher) fällig ist — das Herz des Haushaltsteils."""
+    """Was heute (oder früher) fällig ist — das Herz des Haushaltsteils."""
     day = day or today_str()
     with get_db() as db:
         rows = db.execute(

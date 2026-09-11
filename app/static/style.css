@@ -1,23 +1,21 @@
-/* Kompass — dunkel, ruhig, wenig Farbe.
-   Gestaltungsprinzip: Es soll sich anfuehlen wie ein aufgeraeumter
-   Schreibtisch, nicht wie ein Cockpit. Ein einziger Akzentton, und der
-   taucht nur dort auf, wo etwas eine Entscheidung verlangt. */
+/* Kompass — so wenig Oberfläche wie möglich.
+
+   Leitsatz: Das Einzige, was Aufmerksamkeit bekommen darf, ist der Inhalt.
+   Deshalb keine Kästen, keine Rahmen um alles, keine Knöpfe auf Vorrat —
+   Trennlinien statt Container, Text statt Buttons, und Aktionen erscheinen
+   erst, wenn man eine Zeile antippt. Farbe gibt es genau an einer Stelle:
+   dort, wo etwas fertig ist. */
 :root {
   --bg: #0e1013;
-  --surface: #16191d;
-  --surface-2: #1d2126;
-  --border: #262b31;
-  --border-soft: #1e2228;
-  --ink: #e6e5e2;
-  --ink-2: #9aa0a8;
-  --ink-3: #6a7079;
-  --accent: #5d94a8;          /* die Nadel */
-  --accent-soft: rgba(93, 148, 168, 0.13);
-  --good: #5f9c74;
+  --ink: #e7e6e3;          /* Inhalt: hoher Kontrast */
+  --ink-2: #8b9199;        /* Beiwerk: deutlich zurückgenommen */
+  --ink-3: #5c626a;        /* Randnotizen */
+  --line: #22262b;         /* Trennlinien, kaum sichtbar */
+  --field: #171a1e;
+  --accent: #5d94a8;
   --warn: #c9973f;
   --bad: #c06255;
-  --radius: 10px;
-  --fs: 16px;
+  --fs: 17px;
   color-scheme: dark;
 }
 
@@ -29,212 +27,188 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                "Helvetica Neue", Arial, sans-serif;
   font-size: var(--fs);
-  line-height: 1.6;
-  min-height: 100vh;
-  padding-bottom: 40px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   font-variant-numeric: tabular-nums;
+  padding-bottom: 64px;
 }
 
-/* ------------------------------------------------------------------ Kopf */
-header.topbar {
-  display: flex; align-items: center; gap: 14px;
-  padding: 18px 20px 10px;
-  max-width: 1080px; margin: 0 auto;
+header {
+  display: flex; align-items: center; gap: 10px;
+  max-width: 680px; margin: 0 auto; padding: 22px 22px 6px;
 }
-.logo {
-  font-weight: 600; font-size: 0.95em; letter-spacing: 3.5px;
-  text-transform: uppercase;
+.logo { font-size: 0.8em; letter-spacing: 2.5px; text-transform: uppercase;
+        color: var(--ink-3); }
+/* Der Zustand ist ein Punkt, kein Etikett. Wer wissen will, was er bedeutet,
+   tippt drauf. */
+.state {
+  margin-left: auto; width: 8px; height: 8px; padding: 0; border-radius: 50%;
+  border: none; background: var(--ink-3); cursor: pointer;
 }
-.logo .needle { color: var(--accent); }
-.badge {
-  margin-left: auto; font-size: 0.78em; color: var(--ink-3);
-  cursor: pointer; padding: 5px 12px; border-radius: 20px;
-  border: 1px solid var(--border); background: transparent;
-  font-family: inherit;
-}
-.badge.ok { color: var(--ink-2); }
-.badge.err { color: var(--bad); border-color: rgba(192, 98, 85, .4); }
+.state.ok { background: var(--accent); }
+.state.err { background: var(--bad); }
 
-/* ------------------------------------------------------- Ein Feld fuer alles */
-.capture {
-  position: sticky; top: 0; z-index: 20;
-  display: flex; gap: 8px;
-  max-width: 1080px; margin: 0 auto; padding: 8px 20px 12px;
-  background: linear-gradient(var(--bg) 72%, transparent);
+.capture { display: flex; gap: 8px; max-width: 680px; margin: 0 auto;
+           padding: 6px 22px 14px; }
+.capture.inline { padding: 14px 0 0; }
+.capture input { flex: 1; min-width: 0; }
+.capture button {
+  flex: 0 0 auto; width: 44px; font-size: 1.2em; line-height: 1;
+  color: var(--ink-2); background: var(--field); border: 1px solid var(--line);
+  border-radius: 10px; cursor: pointer;
 }
-.capture.inline { position: static; padding: 12px 0 0; background: none; }
-.capture input {
-  flex: 1; min-width: 0;
-}
+.capture button:hover { color: var(--accent); }
 
-/* ------------------------------------------------------------------ Reiter */
 nav.tabs {
-  display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
-  max-width: 1080px; margin: 0 auto 14px; padding: 0 16px;
-  border-bottom: 1px solid var(--border-soft);
+  display: flex; gap: 22px; max-width: 680px; margin: 0 auto 26px;
+  padding: 0 22px; border-bottom: 1px solid var(--line);
 }
-nav.tabs::-webkit-scrollbar { display: none; }
 nav.tabs button {
-  flex: 0 0 auto; background: none; border: none; color: var(--ink-3);
-  font: inherit; font-size: 0.88em; padding: 8px 10px 10px; cursor: pointer;
-  border-bottom: 2px solid transparent; white-space: nowrap;
+  background: none; border: none; padding: 0 0 10px; cursor: pointer;
+  font: inherit; font-size: 0.92em; color: var(--ink-3);
+  border-bottom: 1px solid transparent; margin-bottom: -1px;
 }
-nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent); }
-.dot {
-  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent); vertical-align: middle; margin-left: 2px;
-}
+nav.tabs button.active { color: var(--ink); border-bottom-color: var(--ink-2); }
+.dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+       background: var(--accent); vertical-align: middle; }
 
-main { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+main { max-width: 680px; margin: 0 auto; padding: 0 22px; }
 .view { display: none; }
 .view.active { display: block; }
 
-/* ------------------------------------------------------------------ Karten */
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+/* -------------------------------------------------------------- Bausteine */
+input, select, textarea, button { font: inherit; color: var(--ink); }
+input, select, textarea {
+  background: var(--field); border: 1px solid var(--line);
+  border-radius: 10px; padding: 11px 13px; width: 100%;
 }
-.card-head {
-  display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;
-}
-.card-head h3 {
-  margin: 0; font-size: 0.82em; font-weight: 600; letter-spacing: 1.6px;
-  text-transform: uppercase; color: var(--ink-2);
-}
-.head-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
-.prose { white-space: pre-wrap; }
-.muted { color: var(--ink-2); }
-.small { font-size: 0.85em; }
-.dim { color: var(--ink-2); font-size: 0.9em; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--ink-3); }
+textarea { resize: vertical; }
 
-/* ---------------------------------------------------------------- Elemente */
-button, input, select, textarea {
-  font: inherit; color: var(--ink);
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: 8px; padding: 9px 11px;
+.btn {
+  background: none; border: 1px solid var(--line); border-radius: 10px;
+  padding: 9px 16px; cursor: pointer; color: var(--ink-2); width: auto;
 }
-input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--accent);
+.btn:hover { color: var(--ink); border-color: var(--ink-3); }
+/* Sekundäre Aktionen sind Text, keine Knöpfe. Ein Knopf ist ein Versprechen
+   von Wichtigkeit — das kann man nicht zwölfmal pro Seite geben. */
+.link {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--ink-3); font-size: 0.85em; text-decoration: none;
 }
-textarea { width: 100%; resize: vertical; }
-.btn { cursor: pointer; white-space: nowrap; }
-.btn:hover { border-color: var(--ink-3); }
-.btn.accent {
-  background: var(--accent-soft); border-color: rgba(93, 148, 168, .45);
-  color: var(--ink);
-}
-.btn.accent:hover { border-color: var(--accent); }
-.btn.small { padding: 5px 10px; font-size: 0.84em; }
-.btn.ghost { background: transparent; }
-.btn.danger:hover { border-color: var(--bad); color: var(--bad); }
-select.small { padding: 5px 8px; font-size: 0.84em; }
-label { display: flex; flex-direction: column; gap: 4px;
-        font-size: 0.82em; color: var(--ink-2); }
-label input, label select { color: var(--ink); font-size: 1rem; }
+.link:hover { color: var(--ink-2); }
 
-.form-grid {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px; margin-top: 10px;
-}
-.form-grid .span2 { grid-column: 1 / -1; }
-.adder { margin-top: 12px; }
-.adder summary {
-  cursor: pointer; color: var(--ink-3); font-size: 0.85em; list-style: none;
-}
-.adder summary::before { content: "+ "; color: var(--accent); }
-.adder[open] summary { color: var(--ink-2); }
+.label { font-size: 0.78em; letter-spacing: 1.2px; text-transform: uppercase;
+         color: var(--ink-3); margin: 32px 0 10px; }
+.quiet { color: var(--ink-3); font-size: 0.82em; margin-left: 8px; }
+p.quiet { margin: 0 0 12px; }
+.foot { color: var(--ink-3); font-size: 0.85em; margin: 14px 0 0;
+        display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.crumb { font-size: 0.92em; color: var(--ink-2); margin: 0 0 20px; }
+.crumb .link { margin-right: 8px; }
+.block { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 18px; }
 
-.pill {
-  font-size: 0.78em; padding: 3px 10px; border-radius: 20px;
-  border: 1px solid var(--border); color: var(--ink-2);
-}
-.pill.warn { color: var(--warn); border-color: rgba(201, 151, 63, .4); }
-.pill.bad { color: var(--bad); border-color: rgba(192, 98, 85, .4); }
-.pill.good { color: var(--good); border-color: rgba(95, 156, 116, .4); }
+/* -------------------------------------------------------------- Briefing */
+.briefing { margin: 0 0 28px; line-height: 1.7; white-space: pre-wrap; }
+.briefing:empty { display: none; }
+.briefing .again { margin-left: 8px; }
 
-/* ------------------------------------------------------------------ Listen */
+/* ----------------------------------------------------------------- Zeilen */
 .list { display: flex; flex-direction: column; }
-.row {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 11px 0; border-top: 1px solid var(--border-soft);
-}
+.row { display: flex; align-items: baseline; gap: 13px; padding: 13px 0;
+       border-top: 1px solid var(--line); }
 .list .row:first-child { border-top: none; }
-.row .grow { flex: 1; min-width: 0; }
+.row .grow { flex: 1; min-width: 0; cursor: default; }
 .row .title { display: block; }
 .row .meta { font-size: 0.8em; color: var(--ink-3); }
-.row.done .title { text-decoration: line-through; color: var(--ink-3); }
-.row-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
-/* In der Inbox stehen die Knoepfe unter den Feldern, nicht daneben — sonst
-   bleibt fuer das Titelfeld auf dem Telefon kaum Platz. */
-.row-actions.spread { margin: 8px 0 0; }
-.empty { color: var(--ink-3); font-size: 0.9em; padding: 10px 0; }
+.row .when { font-size: 0.8em; color: var(--ink-3); flex: 0 0 auto; }
+.row.gone { opacity: .35; }
+.row.gone .title { text-decoration: line-through; }
 
-/* Abhaken: ein grosser, ruhiger Kreis statt einer Checkbox */
+/* Abhaken: ein ruhiger Kreis. Grosszügige Trefferfläche, damit man ihn
+   auf dem Telefon mit dem Daumen trifft. */
 .check {
-  flex: 0 0 auto; width: 22px; height: 22px; margin-top: 2px;
-  border-radius: 50%; border: 1.5px solid var(--ink-3);
-  background: transparent; cursor: pointer; padding: 0;
+  flex: 0 0 auto; width: 20px; height: 20px; padding: 0; margin: 2px -8px 0 -8px;
+  border: none; background: none; cursor: pointer; position: relative;
 }
-.check:hover { border-color: var(--accent); }
-.check.on { background: var(--accent-soft); border-color: var(--accent); }
-
-/* -------------------------------------------------------------- Fortschritt */
-.bar {
-  height: 6px; background: var(--surface-2); border-radius: 3px;
-  overflow: hidden; margin: 6px 0;
+.check::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
 }
-.bar-fill { height: 100%; background: var(--accent); width: 0; transition: width .3s; }
-.bar-fill.over { background: var(--warn); }
-.stat-row { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
-.stat-row div { font-size: 0.85em; color: var(--ink-2); }
-.stat-row b { display: block; color: var(--ink); font-size: 1.25em; font-weight: 600; }
-
-/* ------------------------------------------------------------------ Skalen */
-.rating-row { display: flex; gap: 24px; margin-bottom: 10px; flex-wrap: wrap; }
-.scale { display: flex; gap: 5px; margin-top: 3px; }
-.scale button {
-  width: 34px; padding: 5px 0; text-align: center; cursor: pointer;
-  background: var(--surface-2);
+.check::after {
+  content: ""; position: absolute; inset: -12px;    /* unsichtbar, aber treffbar */
 }
-.scale button.on { background: var(--accent-soft); border-color: var(--accent); }
+.check:hover::before { border-color: var(--accent); }
+.check.on::before { background: var(--accent); border-color: var(--accent); }
 
-/* -------------------------------------------------------------------- Chat */
-.chat { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-.msg { padding: 10px 12px; border-radius: 10px; max-width: 88%; white-space: pre-wrap; }
-.msg.user { align-self: flex-end; background: var(--accent-soft); }
-.msg.assistant { align-self: flex-start; background: var(--surface-2); }
+/* Aktionen erscheinen erst beim Antippen der Zeile. */
+.acts { display: flex; gap: 14px; padding: 2px 0 4px; }
+.acts button { background: none; border: none; padding: 0; cursor: pointer;
+               color: var(--ink-3); font-size: 0.82em; }
+.acts button:hover { color: var(--ink-2); }
+.acts button.warn:hover { color: var(--bad); }
 
-/* ---------------------------------------------------------------- Wochentage */
-.cap-grid {
-  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 6px; margin-top: 10px;
-}
-.cap-grid label { align-items: center; font-size: 0.75em; }
-.cap-grid input { width: 100%; text-align: center; padding: 7px 2px; }
-
-/* ------------------------------------------------------------------- Toast */
-.toast {
-  position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
-  background: var(--surface-2); border: 1px solid var(--border);
-  padding: 10px 16px; border-radius: 24px; font-size: 0.88em;
-  z-index: 50; max-width: 90vw;
-}
-.toast.err { border-color: rgba(192, 98, 85, .5); color: var(--bad); }
-
-/* ----------------------------------------------------------- Aufgeklapptes */
-.panel {
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: 8px; padding: 12px; margin: 8px 0 4px;
-}
-.panel h4 { margin: 0 0 6px; font-size: 0.85em; color: var(--ink-2); }
-.panel .q { margin-bottom: 8px; }
-.panel .q span { display: block; font-size: 0.85em; color: var(--ink-2); }
-.panel input, .panel textarea { width: 100%; margin-top: 3px; }
-.take { border-left: 2px solid var(--accent); padding-left: 10px; margin: 8px 0;
+.empty { color: var(--ink-3); font-size: 0.88em; padding: 6px 0 0; }
+.take { color: var(--ink-2); font-size: 0.9em; margin: 8px 0 2px;
+        padding-left: 12px; border-left: 1px solid var(--line);
         white-space: pre-wrap; }
 
-@media (min-width: 640px) {
-  .form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .form-grid .span2 { grid-column: span 2; }
+/* -------------------------------------------------------------------- Hub */
+.hub { display: flex; flex-direction: column; }
+.hub button {
+  display: flex; align-items: baseline; background: none; border: none;
+  border-top: 1px solid var(--line); padding: 16px 0; cursor: pointer;
+  text-align: left; color: var(--ink); width: 100%;
+}
+.hub button:first-child { border-top: none; }
+.hub em { margin-left: auto; font-style: normal; font-size: 0.82em;
+          color: var(--ink-3); }
+.hub button:hover { color: var(--accent); }
+
+/* ---------------------------------------------------------------- Formulare */
+.adder { margin-top: 26px; }
+.adder summary { cursor: pointer; color: var(--ink-3); font-size: 0.85em;
+                 list-style: none; }
+.adder summary::-webkit-details-marker { display: none; }
+.adder summary::before { content: "+ "; }
+.adder > * { margin-top: 8px; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.fields.wide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.fields label { display: flex; flex-direction: column; gap: 4px;
+                font-size: 0.78em; color: var(--ink-3); }
+
+details.block > summary { cursor: pointer; color: var(--ink-2); font-size: 0.85em;
+                          list-style: none; }
+details.block > summary::-webkit-details-marker { display: none; }
+details.block > summary::before { content: "› "; color: var(--ink-3); }
+details.block[open] > summary::before { content: "⌄ "; }
+details.block > *:not(summary) { margin-top: 14px; }
+
+.cap-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 5px; }
+.cap-grid label { display: flex; flex-direction: column; align-items: center;
+                  gap: 4px; font-size: 0.72em; color: var(--ink-3); }
+.cap-grid input { text-align: center; padding: 8px 2px; }
+
+.scale { display: flex; gap: 6px; margin: 8px 0; }
+.scale button { flex: 1; padding: 9px 0; background: var(--field);
+                border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+                color: var(--ink-2); }
+.scale button.on { border-color: var(--accent); color: var(--ink); }
+
+.chat { display: flex; flex-direction: column; gap: 14px; }
+.msg { white-space: pre-wrap; max-width: 92%; }
+.msg.user { align-self: flex-end; color: var(--ink-2); }
+.msg.assistant { align-self: flex-start; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+  background: var(--field); border: 1px solid var(--line); color: var(--ink-2);
+  padding: 9px 16px; border-radius: 20px; font-size: 0.85em; z-index: 50;
+  max-width: 90vw;
+}
+.toast.err { color: var(--bad); }
+
+@media (min-width: 560px) {
+  .fields, .fields.wide { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

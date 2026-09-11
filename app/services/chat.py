@@ -41,7 +41,7 @@ def send(message: str) -> dict[str, Any]:
 
     system = (briefing.system_prompt()
               + "\n\nDu bekommst den aktuellen Stand mitgeliefert. Nutze ihn, wenn er "
-                "zur Frage passt, und schweig darueber, wenn nicht. Du kannst nichts "
+                "zur Frage passt, und schweig darüber, wenn nicht. Du kannst nichts "
                 "selbst eintragen — wenn etwas gespeichert werden soll, sag ihm, er "
                 "solle es in die Inbox werfen."
               + "\n\nAktueller Stand:\n" + digest)
